@@ -15,8 +15,7 @@ public class LessonController {
     //upload lesson
     @PostMapping
     public ResponseEntity<String> uploadFile(
-            @RequestPart LessonRequest lessonRequest,
-            @RequestPart MultipartFile audioFile) {
+            @RequestPart LessonRequest lessonRequest) {
 
         return ResponseEntity.ok("Successfully uploaded a file");
     }
