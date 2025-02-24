@@ -24,6 +24,4 @@ public class LessonController {
         Lesson createdLesson = lessonService.createLesson(lessonRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdLesson);
     }
-
-    //get lesson
 }
