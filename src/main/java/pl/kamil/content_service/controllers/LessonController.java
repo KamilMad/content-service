@@ -1,5 +1,6 @@
 package pl.kamil.content_service.controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +19,8 @@ public class LessonController {
 
     //upload lesson
     @PostMapping("/uploadFile")
-    public ResponseEntity<Lesson> uploadFile(
-            @RequestPart("title") String title,
-            @RequestPart("content") String content) {
+    public ResponseEntity<Lesson> uploadFile(@RequestBody @Valid LessonRequest lessonRequest) {
 
-        LessonRequest lessonRequest = new LessonRequest(title, content);
         Lesson createdLesson = lessonService.createLesson(lessonRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdLesson);
     }
