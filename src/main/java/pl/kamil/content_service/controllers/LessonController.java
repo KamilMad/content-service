@@ -1,9 +1,11 @@
 package pl.kamil.content_service.controllers;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import pl.kamil.content_service.dtos.LessonRequest;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.services.LessonService;
 
@@ -18,25 +20,13 @@ public class LessonController {
 
     //upload lesson
     @PostMapping("/uploadFile")
-    public ResponseEntity<String> uploadFile(
-            @RequestPart("file")MultipartFile file) {
+    public ResponseEntity<Lesson> uploadFile(
+            @RequestPart("title") String title,
+            @RequestPart("content") String content) {
 
-        String content = "";
-
-        try {
-            content = new String(file.getBytes(), StandardCharsets.UTF_8);
-        }catch (Exception e) {
-            System.out.println("Lypaaaa");
-        }
-
-
-        Lesson lesson = Lesson.builder()
-                .title(file.getOriginalFilename())
-                .content(content)
-                .build();
-
-        lessonService.save(lesson);
-        return ResponseEntity.ok("Successfully uploaded a file");
+        LessonRequest lessonRequest = new LessonRequest(title, content);
+        Lesson createdLesson = lessonService.createLesson(lessonRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdLesson);
     }
 
     //get lesson
