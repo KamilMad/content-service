@@ -51,4 +51,10 @@ public class LessonController {
 
         return ResponseEntity.status(HttpStatus.OK).body(lesson);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteById(@PathVariable Long id) {
+        lessonService.deleteById(id);
+        return ResponseEntity.status(HttpStatus.OK).body("Lesson with id: " + id + " was removed");
+    }
 }

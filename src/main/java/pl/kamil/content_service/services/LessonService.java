@@ -44,11 +44,18 @@ public class LessonService {
     public Lesson findById(Long id) {
         Optional<Lesson> optionalLesson = lessonRepository.findById(id);
 
-        if (optionalLesson.isPresent()) {
-            return optionalLesson.get();
-        }else {
-            //throw new RuntimeException("Lesson not found");
+        if (optionalLesson.isEmpty()) {
             throw new LessonNotFoundException("Lesson with id: " + id + " not found");
         }
+
+        return optionalLesson.get();
+    }
+
+    public void deleteById(Long id) {
+        if (!lessonRepository.existsById(id)) {
+            throw new LessonNotFoundException("Lesson with id: " + id + " not found");
+        }
+
+        lessonRepository.deleteById(id);
     }
 }

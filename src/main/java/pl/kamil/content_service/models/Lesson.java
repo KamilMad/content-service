@@ -3,6 +3,8 @@ package pl.kamil.content_service.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.sql.Timestamp;
+
 @Entity
 @Table(name = "lessons")
 @Data
@@ -17,7 +19,10 @@ public class Lesson {
 
     private String title;
 
-    @Column(columnDefinition = "TEXT")
-    private String content;
+    private long total_words;
 
+    private Timestamp created_at;
+    private Timestamp updated_at;
+
+    // Todo: Associate lesson with user
 }
