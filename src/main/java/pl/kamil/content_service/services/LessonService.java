@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.dtos.LessonRequest;
+import pl.kamil.content_service.exceptions.LessonNotFoundException;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,5 +39,16 @@ public class LessonService {
         lesson.setContent(content);
 
         lessonRepository.save(lesson);
+    }
+
+    public Lesson findById(Long id) {
+        Optional<Lesson> optionalLesson = lessonRepository.findById(id);
+
+        if (optionalLesson.isPresent()) {
+            return optionalLesson.get();
+        }else {
+            //throw new RuntimeException("Lesson not found");
+            throw new LessonNotFoundException("Lesson with id: " + id + " not found");
+        }
     }
 }
