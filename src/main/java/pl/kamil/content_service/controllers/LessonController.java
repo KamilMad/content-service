@@ -20,13 +20,13 @@ public class LessonController {
 
     private final LessonService lessonService;
 
-    //upload lesson
-    @PostMapping("/uploadFile")
-    public ResponseEntity<Lesson> uploadFile(@RequestBody @Valid LessonRequest lessonRequest) {
-
-        Lesson createdLesson = lessonService.createLesson(lessonRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdLesson);
-    }
+//    //upload lesson
+//    @PostMapping("/uploadFile")
+//    public ResponseEntity<Lesson> uploadFile(@RequestBody @Valid LessonRequest lessonRequest) {
+//
+//        Lesson createdLesson = lessonService.createLesson(lessonRequest);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(createdLesson);
+//    }
 
     @PostMapping("upload")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {

@@ -10,6 +10,9 @@ import pl.kamil.content_service.repositories.LessonRepository;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,14 +22,14 @@ public class LessonService {
 
     private final LessonRepository lessonRepository;
 
-    public Lesson createLesson(LessonRequest lessonRequest) {
-
-        Lesson lesson = new Lesson();
-        lesson.setTitle(lessonRequest.title());
-        lesson.setContent(lessonRequest.content());
-
-        return lessonRepository.save(lesson);
-    }
+//    public Lesson createLesson(LessonRequest lessonRequest) {
+//
+//        Lesson lesson = new Lesson();
+//        lesson.setTitle(lessonRequest.title());
+//        //lesson.setContent(lessonRequest.content());
+//
+//        return lessonRepository.save(lesson);
+//    }
 
     public List<Lesson> findAll() {
         return lessonRepository.findAll();
@@ -36,7 +39,12 @@ public class LessonService {
         String content = new String(file.getBytes(), StandardCharsets.UTF_8);
         Lesson lesson = new Lesson();
         lesson.setTitle(file.getOriginalFilename());
-        lesson.setContent(content);
+
+        lesson.setTotal_words(calculateTotalWords(file));
+
+        lesson.setCreated_at(Instant.now());
+        lesson.setUpdated_at(Instant.now());
+        //lesson.setContent(content);
 
         lessonRepository.save(lesson);
     }
@@ -57,5 +65,12 @@ public class LessonService {
         }
 
         lessonRepository.deleteById(id);
+    }
+
+    private long calculateTotalWords(MultipartFile file) throws IOException {
+        String content = new String(file.getBytes(), StandardCharsets.UTF_8);
+
+        return content.split("\\s+").length;
+
     }
 }

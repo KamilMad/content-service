@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Date;
 
 @Entity
 @Table(name = "lessons")
@@ -21,8 +23,8 @@ public class Lesson {
 
     private long total_words;
 
-    private Timestamp created_at;
-    private Timestamp updated_at;
+    private Instant created_at;
+    private Instant updated_at;
 
     // Todo: Associate lesson with user
 }
