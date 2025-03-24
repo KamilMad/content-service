@@ -1,7 +1,17 @@
 package pl.kamil.content_service.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.dtos.LessonRequest;
 import pl.kamil.content_service.exceptions.LessonNotFoundException;
@@ -10,10 +20,10 @@ import pl.kamil.content_service.repositories.LessonRepository;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -21,21 +31,16 @@ import java.util.Optional;
 public class LessonService {
 
     private final LessonRepository lessonRepository;
-
-//    public Lesson createLesson(LessonRequest lessonRequest) {
-//
-//        Lesson lesson = new Lesson();
-//        lesson.setTitle(lessonRequest.title());
-//        //lesson.setContent(lessonRequest.content());
-//
-//        return lessonRepository.save(lesson);
-//    }
+    private final RabbitTemplate rabbitTemplate;
 
     public List<Lesson> findAll() {
         return lessonRepository.findAll();
     }
 
     public void saveLessonFromFile(MultipartFile file) throws IOException {
+
+        // Call the /file/upload endpoint from FileUploadService
+
         String content = new String(file.getBytes(), StandardCharsets.UTF_8);
         Lesson lesson = new Lesson();
         lesson.setTitle(file.getOriginalFilename());
@@ -72,5 +77,36 @@ public class LessonService {
 
         return content.split("\\s+").length;
 
+    }
+
+    public void requestFileUpload(LessonRequest request) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            // Convert LessonRequest object to JSON string
+            String jsonMessage = objectMapper.writeValueAsString(request);
+            rabbitTemplate.convertAndSend("uploadQueue", jsonMessage);
+            System.out.println("📤 Sent message as JSON: " + jsonMessage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void uploadFile(MultipartFile file) throws IOException {
+
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", new ByteArrayResource(file.getBytes()){
+            @Override
+            public String getFilename() {
+                return file.getOriginalFilename();
+            }
+        });
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.postForEntity("http://localhost:8081/files", request, String.class);
     }
 }

@@ -10,6 +10,7 @@ import pl.kamil.content_service.dtos.LessonRequest;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.services.LessonService;
 
+import java.io.IOException;
 import java.util.List;
 
 @CrossOrigin(origins = "http://127.0.0.1:5500")  // Allow frontend access
@@ -56,5 +57,18 @@ public class LessonController {
     public ResponseEntity<String> deleteById(@PathVariable Long id) {
         lessonService.deleteById(id);
         return ResponseEntity.status(HttpStatus.OK).body("Lesson with id: " + id + " was removed");
+    }
+
+    @PostMapping("/test")
+    public ResponseEntity<String> rabbitMqTest(@RequestBody LessonRequest request) {
+        lessonService.requestFileUpload(request);
+
+        return ResponseEntity.status(HttpStatus.OK).body("RabbitMq successfull");
+    }
+
+    @PostMapping("/test2")
+    public ResponseEntity<String> uploadFileRabbitMq(@RequestParam MultipartFile file) throws IOException {
+        lessonService.uploadFile(file);
+        return ResponseEntity.status(HttpStatus.OK).body("Successful upload");
     }
 }
