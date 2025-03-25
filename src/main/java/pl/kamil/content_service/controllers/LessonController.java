@@ -68,7 +68,7 @@ public class LessonController {
 
     @PostMapping("/test2")
     public ResponseEntity<String> uploadFileRabbitMq(@RequestParam MultipartFile file) throws IOException {
-        lessonService.uploadFile(file);
-        return ResponseEntity.status(HttpStatus.OK).body("Successful upload");
+        String url = lessonService.uploadFile(file);
+        return ResponseEntity.status(HttpStatus.OK).body(url);
     }
 }

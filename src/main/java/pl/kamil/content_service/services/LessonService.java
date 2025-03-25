@@ -8,6 +8,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -33,67 +34,68 @@ public class LessonService {
     private final LessonRepository lessonRepository;
     private final RabbitTemplate rabbitTemplate;
 
-    public List<Lesson> findAll() {
-        return lessonRepository.findAll();
-    }
+//    public List<Lesson> findAll() {
+//        return lessonRepository.findAll();
+//    }
+//
+//    public void saveLessonFromFile(MultipartFile file) throws IOException {
+//
+//        // Call the /file/upload endpoint from FileUploadService
+//
+//        String content = new String(file.getBytes(), StandardCharsets.UTF_8);
+//        Lesson lesson = new Lesson();
+//        lesson.setTitle(file.getOriginalFilename());
+//
+//        lesson.setTotal_words(calculateTotalWords(file));
+//
+//        lesson.setCreated_at(Instant.now());
+//        lesson.setUpdated_at(Instant.now());
+//        //lesson.setContent(content);
+//
+//        lessonRepository.save(lesson);
+//    }
+//
+//    public Lesson findById(Long id) {
+//        Optional<Lesson> optionalLesson = lessonRepository.findById(id);
+//
+//        if (optionalLesson.isEmpty()) {
+//            throw new LessonNotFoundException("Lesson with id: " + id + " not found");
+//        }
+//
+//        return optionalLesson.get();
+//    }
+//
+//    public void deleteById(Long id) {
+//        if (!lessonRepository.existsById(id)) {
+//            throw new LessonNotFoundException("Lesson with id: " + id + " not found");
+//        }
+//
+//        lessonRepository.deleteById(id);
+//    }
+//
+//    private long calculateTotalWords(MultipartFile file) throws IOException {
+//        String content = new String(file.getBytes(), StandardCharsets.UTF_8);
+//
+//        return content.split("\\s+").length;
+//
+//    }
+//
+//    public void requestFileUpload(LessonRequest request) {
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        try {
+//            // Convert LessonRequest object to JSON string
+//            String jsonMessage = objectMapper.writeValueAsString(request);
+//            rabbitTemplate.convertAndSend("uploadQueue", jsonMessage);
+//            System.out.println("📤 Sent message as JSON: " + jsonMessage);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
-    public void saveLessonFromFile(MultipartFile file) throws IOException {
-
-        // Call the /file/upload endpoint from FileUploadService
-
-        String content = new String(file.getBytes(), StandardCharsets.UTF_8);
-        Lesson lesson = new Lesson();
-        lesson.setTitle(file.getOriginalFilename());
-
-        lesson.setTotal_words(calculateTotalWords(file));
-
-        lesson.setCreated_at(Instant.now());
-        lesson.setUpdated_at(Instant.now());
-        //lesson.setContent(content);
-
-        lessonRepository.save(lesson);
-    }
-
-    public Lesson findById(Long id) {
-        Optional<Lesson> optionalLesson = lessonRepository.findById(id);
-
-        if (optionalLesson.isEmpty()) {
-            throw new LessonNotFoundException("Lesson with id: " + id + " not found");
-        }
-
-        return optionalLesson.get();
-    }
-
-    public void deleteById(Long id) {
-        if (!lessonRepository.existsById(id)) {
-            throw new LessonNotFoundException("Lesson with id: " + id + " not found");
-        }
-
-        lessonRepository.deleteById(id);
-    }
-
-    private long calculateTotalWords(MultipartFile file) throws IOException {
-        String content = new String(file.getBytes(), StandardCharsets.UTF_8);
-
-        return content.split("\\s+").length;
-
-    }
-
-    public void requestFileUpload(LessonRequest request) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            // Convert LessonRequest object to JSON string
-            String jsonMessage = objectMapper.writeValueAsString(request);
-            rabbitTemplate.convertAndSend("uploadQueue", jsonMessage);
-            System.out.println("📤 Sent message as JSON: " + jsonMessage);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void uploadFile(MultipartFile file) throws IOException {
+    public String uploadFile(MultipartFile file) throws IOException {
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
         body.add("file", new ByteArrayResource(file.getBytes()){
             @Override
             public String getFilename() {
@@ -107,6 +109,8 @@ public class LessonService {
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
 
         RestTemplate restTemplate = new RestTemplate();
-        restTemplate.postForEntity("http://localhost:8081/files", request, String.class);
+        ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:8081/files", request, String.class);
+
+        return response.getBody();
     }
 }
