@@ -28,47 +28,53 @@ public class LessonController {
 //        Lesson createdLesson = lessonService.createLesson(lessonRequest);
 //        return ResponseEntity.status(HttpStatus.CREATED).body(createdLesson);
 //    }
+//
+//    @PostMapping("upload")
+//    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+//        try {
+//            lessonService.saveLessonFromFile(file);
+//            return ResponseEntity.ok("File uploaded successfully");
+//        }catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("File upload failed: " + e.getMessage());
+//        }
+//    }
+//
+//    @GetMapping
+//    public ResponseEntity<List<Lesson>> getAllLessons() {
+//        List<Lesson> lessons = lessonService.findAll();
+//        return ResponseEntity.status(HttpStatus.OK).body(lessons);
+//    }
+//
+//    @GetMapping("/{id}")
+//    public ResponseEntity<Lesson> getLessonById(@PathVariable Long id) {
+//        Lesson lesson = lessonService.findById(id);
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(lesson);
+//    }
+//
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<String> deleteById(@PathVariable Long id) {
+//        lessonService.deleteById(id);
+//        return ResponseEntity.status(HttpStatus.OK).body("Lesson with id: " + id + " was removed");
+//    }
+//
+//    @PostMapping("/test")
+//    public ResponseEntity<String> rabbitMqTest(@RequestBody LessonRequest request) {
+//        lessonService.requestFileUpload(request);
+//
+//        return ResponseEntity.status(HttpStatus.OK).body("RabbitMq successfull");
+//    }
 
-    @PostMapping("upload")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
-        try {
-            lessonService.saveLessonFromFile(file);
-            return ResponseEntity.ok("File uploaded successfully");
-        }catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("File upload failed: " + e.getMessage());
-        }
-    }
-
-    @GetMapping
-    public ResponseEntity<List<Lesson>> getAllLessons() {
-        List<Lesson> lessons = lessonService.findAll();
-        return ResponseEntity.status(HttpStatus.OK).body(lessons);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Lesson> getLessonById(@PathVariable Long id) {
-        Lesson lesson = lessonService.findById(id);
-
-        return ResponseEntity.status(HttpStatus.OK).body(lesson);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteById(@PathVariable Long id) {
-        lessonService.deleteById(id);
-        return ResponseEntity.status(HttpStatus.OK).body("Lesson with id: " + id + " was removed");
-    }
-
-    @PostMapping("/test")
-    public ResponseEntity<String> rabbitMqTest(@RequestBody LessonRequest request) {
-        lessonService.requestFileUpload(request);
-
-        return ResponseEntity.status(HttpStatus.OK).body("RabbitMq successfull");
-    }
-
-    @PostMapping("/test2")
+    @PostMapping("/create")
     public ResponseEntity<String> uploadFileRabbitMq(@RequestParam MultipartFile file) throws IOException {
         String url = lessonService.uploadFile(file);
         return ResponseEntity.status(HttpStatus.OK).body(url);
+    }
+
+    @DeleteMapping("/delete/{key}")
+    public void deleteFileByKey(@PathVariable String key) {
+        lessonService.deleteByKey(key);
+
     }
 }

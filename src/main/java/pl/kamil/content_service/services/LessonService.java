@@ -32,7 +32,8 @@ import java.util.Optional;
 public class LessonService {
 
     private final LessonRepository lessonRepository;
-    private final RabbitTemplate rabbitTemplate;
+    //private final RabbitTemplate rabbitTemplate;
+    private final RestTemplate restTemplate;
 
 //    public List<Lesson> findAll() {
 //        return lessonRepository.findAll();
@@ -108,9 +109,12 @@ public class LessonService {
 
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
 
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:8081/files", request, String.class);
+        ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:8080/files", request, String.class);
 
         return response.getBody();
+    }
+
+    public void deleteByKey(String key) {
+        restTemplate.postForEntity("http://localhost:8081/files/{key}", key, String.class);
     }
 }
