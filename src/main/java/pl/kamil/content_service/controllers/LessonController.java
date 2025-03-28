@@ -1,17 +1,13 @@
 package pl.kamil.content_service.controllers;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import pl.kamil.content_service.dtos.LessonRequest;
-import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.services.LessonService;
 
 import java.io.IOException;
-import java.util.List;
 
 @CrossOrigin(origins = "http://127.0.0.1:5500")  // Allow frontend access
 @RestController
@@ -66,15 +62,25 @@ public class LessonController {
 //        return ResponseEntity.status(HttpStatus.OK).body("RabbitMq successfull");
 //    }
 
-    @PostMapping("/create")
-    public ResponseEntity<String> uploadFileRabbitMq(@RequestParam MultipartFile file) throws IOException {
-        String url = lessonService.uploadFile(file);
-        return ResponseEntity.status(HttpStatus.OK).body(url);
+//    @PostMapping("/create")
+//    public ResponseEntity<String> uploadFile(@RequestParam MultipartFile file) throws IOException {
+//        String url = lessonService.uploadFile(file);
+//        return ResponseEntity.status(HttpStatus.OK).body(url);
+//    }
+
+    @PostMapping()
+    public ResponseEntity<Long> createLesson(
+            @RequestParam MultipartFile file,
+            @RequestParam String title) throws IOException {
+
+        Long id = lessonService.createLesson(file, title);
+
+        return ResponseEntity.ok().body(id);
     }
 
     @DeleteMapping("/delete/{key}")
     public void deleteFileByKey(@PathVariable String key) {
-        lessonService.deleteByKey(key);
 
+        lessonService.deleteByKey(key);
     }
 }

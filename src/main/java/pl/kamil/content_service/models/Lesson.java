@@ -26,5 +26,6 @@ public class Lesson {
     private Instant created_at;
     private Instant updated_at;
 
-    // Todo: Associate lesson with user
+    private Long createdBy;
+
 }
