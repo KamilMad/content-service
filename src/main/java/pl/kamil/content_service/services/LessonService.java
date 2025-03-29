@@ -18,6 +18,7 @@ import pl.kamil.content_service.repositories.LessonRepository;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Optional;
 
 
 @Service
@@ -47,29 +48,17 @@ public class LessonService {
         return savedLesson.getId();
     }
 
+    private void attachFileToLesson(Long lessonId, String fileUrl) {
+        Optional<Lesson> lessonOptional = lessonRepository.findById(lessonId);
 
-    public FileUploadResponse uploadFile(MultipartFile file, long lessonId, long userId) throws IOException {
+        if (lessonOptional.isEmpty()) {
+            throw new RuntimeException("Lesson doesn't exist");
+        }
 
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        Lesson lesson = lessonOptional.get();
+        lesson.setFileUrl(fileUrl);
 
-        body.add("file", new ByteArrayResource(file.getBytes()){
-            @Override
-            public String getFilename() {
-                return file.getOriginalFilename();
-            }
-        });
-
-        body.add("lessonId", lessonId);
-        body.add("userId", userId);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
-
-        ResponseEntity<FileUploadResponse> response = restTemplate.postForEntity("http://localhost:8080/files", request, FileUploadResponse.class);
-
-        return response.getBody();
+        lessonRepository.save(lesson);
     }
 
     public void deleteByKey(String key) {
