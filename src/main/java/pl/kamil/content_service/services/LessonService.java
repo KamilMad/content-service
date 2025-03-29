@@ -11,6 +11,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import pl.kamil.content_service.dtos.FileUploadResponse;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
 
@@ -38,13 +39,16 @@ public class LessonService {
         Lesson savedLesson = lessonRepository.save(lesson);
 
         //call FileUploadServiceApi to upload file to S3
-        uploadFile(multipartFile, savedLesson.getId(), savedLesson.getCreatedBy());
+        FileUploadResponse response = uploadFile(multipartFile, savedLesson.getId(), savedLesson.getCreatedBy());
+
+        savedLesson.setFileUrl(response.url());
+        savedLesson = lessonRepository.save(savedLesson);
 
         return savedLesson.getId();
     }
 
 
-    public String uploadFile(MultipartFile file, long lessonId, long userId) throws IOException {
+    public FileUploadResponse uploadFile(MultipartFile file, long lessonId, long userId) throws IOException {
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 
@@ -55,7 +59,6 @@ public class LessonService {
             }
         });
 
-
         body.add("lessonId", lessonId);
         body.add("userId", userId);
 
@@ -64,7 +67,7 @@ public class LessonService {
 
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
 
-        ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:8080/files", request, String.class);
+        ResponseEntity<FileUploadResponse> response = restTemplate.postForEntity("http://localhost:8080/files", request, FileUploadResponse.class);
 
         return response.getBody();
     }

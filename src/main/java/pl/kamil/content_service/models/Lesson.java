@@ -28,4 +28,5 @@ public class Lesson {
 
     private Long createdBy;
 
+    private String fileUrl;
 }
