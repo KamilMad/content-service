@@ -12,7 +12,6 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Lesson {
 
     @Id
@@ -27,6 +26,15 @@ public class Lesson {
     private Instant updated_at;
 
     private Long createdBy;
-
     private String fileUrl;
+
+    public static Lesson create(String title, Long userId, long totalWords) {
+        Lesson lesson = new Lesson();
+        lesson.setTitle(title);
+        lesson.setCreatedBy(userId);
+        lesson.setTotal_words(totalWords);
+        lesson.setCreated_at(Instant.now());
+        lesson.setUpdated_at(Instant.now());
+        return lesson;
+    }
 }
