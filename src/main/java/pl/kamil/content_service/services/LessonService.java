@@ -6,12 +6,14 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.dtos.FileUploadResponse;
 import pl.kamil.content_service.dtos.LessonResponse;
+import pl.kamil.content_service.dtos.LessonsResponse;
 import pl.kamil.content_service.exceptions.LessonNotFoundException;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -51,10 +53,16 @@ public class LessonService {
         Lesson lesson = lessonRepository.findById(id)
                 .orElseThrow(() -> new LessonNotFoundException("Lesson with id: " + id + " not funnd"));
 
-        return mapLessonToLessonResponse(lesson);
-    }
-
-    private LessonResponse mapLessonToLessonResponse(Lesson lesson) {
         return LessonResponse.from(lesson);
     }
+
+    public LessonsResponse getAll() {
+        List<Lesson> lessons = lessonRepository.findAll();
+        List<LessonResponse> lessonResponses = lessons.stream()
+                .map(LessonResponse::from)
+                .toList();
+
+        return LessonsResponse.from(lessonResponses);
+    }
+
 }

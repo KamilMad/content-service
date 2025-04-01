@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.dtos.LessonResponse;
+import pl.kamil.content_service.dtos.LessonsResponse;
 import pl.kamil.content_service.services.LessonService;
 
 import java.io.IOException;
@@ -84,6 +85,13 @@ public class LessonController {
 //
 //        lessonService.deleteByKey(key);
 //    }
+
+    @GetMapping
+    public ResponseEntity<LessonsResponse> getLessons() {
+        LessonsResponse response = lessonService.getAll();
+
+        return ResponseEntity.ok().body(response);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<LessonResponse> getLessonById(@PathVariable Long id) {
