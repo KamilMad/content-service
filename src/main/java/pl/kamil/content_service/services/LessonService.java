@@ -2,7 +2,6 @@ package pl.kamil.content_service.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.dtos.FileUploadResponse;
 import pl.kamil.content_service.dtos.LessonResponse;
@@ -14,7 +13,6 @@ import pl.kamil.content_service.repositories.LessonRepository;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 
 @Service
@@ -65,4 +63,7 @@ public class LessonService {
         return LessonsResponse.from(lessonResponses);
     }
 
+    public void deleteById(String key) {
+        lessonFileService.deleteFile(key);
+    }
 }

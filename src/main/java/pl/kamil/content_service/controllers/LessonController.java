@@ -19,57 +19,6 @@ public class LessonController {
 
     private final LessonService lessonService;
 
-//    //upload lesson
-//    @PostMapping("/uploadFile")
-//    public ResponseEntity<Lesson> uploadFile(@RequestBody @Valid LessonRequest lessonRequest) {
-//
-//        Lesson createdLesson = lessonService.createLesson(lessonRequest);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(createdLesson);
-//    }
-//
-//    @PostMapping("upload")
-//    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
-//        try {
-//            lessonService.saveLessonFromFile(file);
-//            return ResponseEntity.ok("File uploaded successfully");
-//        }catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body("File upload failed: " + e.getMessage());
-//        }
-//    }
-//
-//    @GetMapping
-//    public ResponseEntity<List<Lesson>> getAllLessons() {
-//        List<Lesson> lessons = lessonService.findAll();
-//        return ResponseEntity.status(HttpStatus.OK).body(lessons);
-//    }
-//
-//    @GetMapping("/{id}")
-//    public ResponseEntity<Lesson> getLessonById(@PathVariable Long id) {
-//        Lesson lesson = lessonService.findById(id);
-//
-//        return ResponseEntity.status(HttpStatus.OK).body(lesson);
-//    }
-//
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<String> deleteById(@PathVariable Long id) {
-//        lessonService.deleteById(id);
-//        return ResponseEntity.status(HttpStatus.OK).body("Lesson with id: " + id + " was removed");
-//    }
-//
-//    @PostMapping("/test")
-//    public ResponseEntity<String> rabbitMqTest(@RequestBody LessonRequest request) {
-//        lessonService.requestFileUpload(request);
-//
-//        return ResponseEntity.status(HttpStatus.OK).body("RabbitMq successfull");
-//    }
-
-//    @PostMapping("/create")
-//    public ResponseEntity<String> uploadFile(@RequestParam MultipartFile file) throws IOException {
-//        String url = lessonService.uploadFile(file);
-//        return ResponseEntity.status(HttpStatus.OK).body(url);
-//    }
-
     @PostMapping()
     public ResponseEntity<Long> createLesson(
             @RequestParam MultipartFile file,
@@ -79,12 +28,6 @@ public class LessonController {
 
         return ResponseEntity.ok().body(id);
     }
-
-//    @DeleteMapping("/delete/{key}")
-//    public void deleteFileByKey(@PathVariable String key) {
-//
-//        lessonService.deleteByKey(key);
-//    }
 
     @GetMapping
     public ResponseEntity<LessonsResponse> getLessons() {
@@ -99,4 +42,17 @@ public class LessonController {
 
         return ResponseEntity.ok().body(response);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteLesson(@PathVariable String id) {
+        lessonService.deleteById(id);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+//    @DeleteMapping("/delete/{key}")
+//    public void deleteFileByKey(@PathVariable String key) {
+//
+//        lessonService.deleteByKey(key);
+//    }
 }

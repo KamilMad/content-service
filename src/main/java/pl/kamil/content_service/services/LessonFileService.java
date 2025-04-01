@@ -78,6 +78,10 @@ public class LessonFileService {
         return headers;
     }
 
+    public void deleteFile(String key) {
+        restTemplate.delete(FILE_UPLOAD_URL + "/" + key);
+    }
+
 //    public void deleteByKey(String key) {
 //        restTemplate.postForEntity("http://localhost:8081/files/{key}", key, String.class);
 //    }
