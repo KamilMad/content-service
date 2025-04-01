@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import pl.kamil.content_service.dtos.LessonResponse;
 import pl.kamil.content_service.services.LessonService;
 
 import java.io.IOException;
@@ -78,9 +79,16 @@ public class LessonController {
         return ResponseEntity.ok().body(id);
     }
 
-    @DeleteMapping("/delete/{key}")
-    public void deleteFileByKey(@PathVariable String key) {
+//    @DeleteMapping("/delete/{key}")
+//    public void deleteFileByKey(@PathVariable String key) {
+//
+//        lessonService.deleteByKey(key);
+//    }
 
-        lessonService.deleteByKey(key);
+    @GetMapping("/{id}")
+    public ResponseEntity<LessonResponse> getLessonById(@PathVariable Long id) {
+        LessonResponse response = lessonService.getById(id);
+
+        return ResponseEntity.ok().body(response);
     }
 }

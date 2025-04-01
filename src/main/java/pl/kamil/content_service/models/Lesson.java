@@ -3,9 +3,7 @@ package pl.kamil.content_service.models;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Date;
 
 @Entity
 @Table(name = "lessons")
@@ -19,7 +17,6 @@ public class Lesson {
     private Long id;
 
     private String title;
-
     private long total_words;
 
     private Instant created_at;

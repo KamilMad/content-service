@@ -1,22 +1,16 @@
 package pl.kamil.content_service.services;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.dtos.FileUploadResponse;
+import pl.kamil.content_service.dtos.LessonResponse;
+import pl.kamil.content_service.exceptions.LessonNotFoundException;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Optional;
 
@@ -26,47 +20,41 @@ import java.util.Optional;
 public class LessonService {
 
     private final LessonRepository lessonRepository;
-    private final RestTemplate restTemplate;
+    private final LessonFileService lessonFileService;
+    private final TextAnalysisService textAnalysisService;
 
     public Long createLesson(MultipartFile multipartFile, String lessonTitle) throws IOException {
+
+        Lesson lesson = createLessonFromFile(lessonTitle, multipartFile, 1L);
         // Save Lesson metadata to db
-        Lesson lesson = new Lesson();
-        lesson.setTitle(lessonTitle);
-        lesson.setTotal_words(calculateTotalWords(new String(multipartFile.getBytes(), StandardCharsets.UTF_8)));
-        lesson.setCreated_at(Instant.now());
-        lesson.setUpdated_at(Instant.now());
-        lesson.setCreatedBy(1L);
-
         Lesson savedLesson = lessonRepository.save(lesson);
-
         //call FileUploadServiceApi to upload file to S3
-        FileUploadResponse response = uploadFile(multipartFile, savedLesson.getId(), savedLesson.getCreatedBy());
-
-        savedLesson.setFileUrl(response.url());
-        savedLesson = lessonRepository.save(savedLesson);
+        FileUploadResponse response = lessonFileService.uploadFile(multipartFile, savedLesson.getId(), savedLesson.getCreatedBy());
+        updateLessonWithFileUrl(savedLesson, response.url());
 
         return savedLesson.getId();
     }
 
-    private void attachFileToLesson(Long lessonId, String fileUrl) {
-        Optional<Lesson> lessonOptional = lessonRepository.findById(lessonId);
-
-        if (lessonOptional.isEmpty()) {
-            throw new RuntimeException("Lesson doesn't exist");
-        }
-
-        Lesson lesson = lessonOptional.get();
-        lesson.setFileUrl(fileUrl);
-
+    private void updateLessonWithFileUrl(Lesson lesson, String url) {
+        lesson.setFileUrl(url);
+        lesson.setUpdated_at(Instant.now());
         lessonRepository.save(lesson);
     }
 
-    public void deleteByKey(String key) {
-        restTemplate.postForEntity("http://localhost:8081/files/{key}", key, String.class);
+    private Lesson createLessonFromFile(String title, MultipartFile file, Long userId) {
+        long totalWords = textAnalysisService.countWordsInFile(file);
+        return Lesson.create(title,userId, totalWords);
     }
 
-    private long calculateTotalWords(String content) {
-        String[] words = content.trim().split("\\s+");
-        return words.length;
+    public LessonResponse getById(Long id) {
+
+        Lesson lesson = lessonRepository.findById(id)
+                .orElseThrow(() -> new LessonNotFoundException("Lesson with id: " + id + " not funnd"));
+
+        return mapLessonToLessonResponse(lesson);
+    }
+
+    private LessonResponse mapLessonToLessonResponse(Lesson lesson) {
+        return LessonResponse.from(lesson);
     }
 }
