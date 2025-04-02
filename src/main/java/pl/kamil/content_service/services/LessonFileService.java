@@ -3,10 +3,9 @@ package pl.kamil.content_service.services;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -15,7 +14,11 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.dtos.FileUploadResponse;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -82,7 +85,24 @@ public class LessonFileService {
         restTemplate.delete(FILE_UPLOAD_URL + "/" + key);
     }
 
-//    public void deleteByKey(String key) {
-//        restTemplate.postForEntity("http://localhost:8081/files/{key}", key, String.class);
-//    }
+    public String getFileContent(String fileKey) {
+        String url = FILE_UPLOAD_URL + "/" + fileKey;
+
+        ResponseEntity<Resource> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                Resource.class
+        );
+
+        try (InputStream is = response.getBody().getInputStream();
+             BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+
+            return reader.lines().collect(Collectors.joining("\n"));
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read file content", e);
+        }
+    }
+
 }

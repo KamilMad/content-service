@@ -50,9 +50,11 @@ public class LessonController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-//    @DeleteMapping("/delete/{key}")
-//    public void deleteFileByKey(@PathVariable String key) {
-//
-//        lessonService.deleteByKey(key);
-//    }
+    @GetMapping("/{id}/content")
+    public ResponseEntity<String> getContent(@PathVariable Long id) {
+        String content = lessonService.getLessonContent(id);
+
+        return ResponseEntity.ok().body(content);
+    }
+
 }

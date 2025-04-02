@@ -11,6 +11,7 @@ import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
 
 import java.io.IOException;
+import java.net.URI;
 import java.time.Instant;
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class LessonService {
     public LessonResponse getById(Long id) {
 
         Lesson lesson = lessonRepository.findById(id)
-                .orElseThrow(() -> new LessonNotFoundException("Lesson with id: " + id + " not funnd"));
+                .orElseThrow(() -> new LessonNotFoundException("Lesson with id: " + id + " not found"));
 
         return LessonResponse.from(lesson);
     }
@@ -66,4 +67,22 @@ public class LessonService {
     public void deleteById(String key) {
         lessonFileService.deleteFile(key);
     }
+
+    public String getLessonContent(Long id) {
+        Lesson lesson = lessonRepository.findById(id)
+                .orElseThrow(() -> new LessonNotFoundException("Lesson with id: " + id + " not found"));
+
+        String fileKey = extractKeyFromUrl(lesson.getFileUrl());
+
+        return lessonFileService.getFileContent(fileKey);
+    }
+
+
+    private String extractKeyFromUrl(String url) {
+        URI uri = URI.create(url);
+        String path = uri.getPath(); // e.g. /lessons/abc.txt
+
+        return path.substring(path.lastIndexOf('/') + 1); // → abc.txt
+    }
+
 }
