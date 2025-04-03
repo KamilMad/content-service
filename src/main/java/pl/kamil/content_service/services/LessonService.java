@@ -1,6 +1,7 @@
 package pl.kamil.content_service.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,15 +62,6 @@ public class LessonService {
         return LessonResponse.from(lesson);
     }
 
-//    public LessonsResponse getAll() {
-//        List<Lesson> lessons = lessonRepository.findAll();
-//        List<LessonResponse> lessonResponses = lessons.stream()
-//                .map(LessonResponse::from)
-//                .toList();
-//
-//        return LessonsResponse.from(lessonResponses);
-//    }
-
     public LessonsResponse getAll() {
         Long userId = getCurrentUserId();
         List<Lesson> lessons = lessonRepository.findAllByCreatedBy(userId);
@@ -79,17 +71,28 @@ public class LessonService {
 
         return LessonsResponse.from(lessonResponses);
     }
-    public void deleteById(String key) {
-        lessonFileService.deleteFile(key);
-    }
 
+
+    public void deleteById(Long lessonId) {
+
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new LessonNotFoundException("Lesson with id: " + lessonId + " not found"));
+
+        if (!lesson.getCreatedBy().equals(getCurrentUserId())) {
+            throw new AccessDeniedException("Not your lesson");
+        }
+
+        String fileKey = extractKeyFromUrl(lesson.getFileUrl());
+        lessonFileService.deleteFile(fileKey);
+        lessonRepository.deleteById(lessonId);
+    }
 
     public String getLessonContent(Long id) {
         Lesson lesson = lessonRepository.findById(id)
                 .orElseThrow(() -> new LessonNotFoundException("Lesson with id: " + id + " not found"));
 
         if (!lesson.getCreatedBy().equals(getCurrentUserId())) {
-            throw new RuntimeException("You don't have access to this lesson.");
+            throw new AccessDeniedException("Not your lesson");
         }
 
         String fileKey = extractKeyFromUrl(lesson.getFileUrl());

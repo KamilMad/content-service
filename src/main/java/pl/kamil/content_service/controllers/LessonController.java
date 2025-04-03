@@ -44,7 +44,7 @@ public class LessonController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteLesson(@PathVariable String id) {
+    public ResponseEntity<Void> deleteLesson(@PathVariable Long id) {
         lessonService.deleteById(id);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
