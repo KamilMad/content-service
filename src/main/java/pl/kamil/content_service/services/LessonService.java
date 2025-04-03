@@ -1,6 +1,7 @@
 package pl.kamil.content_service.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.dtos.FileUploadResponse;
@@ -26,7 +27,8 @@ public class LessonService {
 
     public Long createLesson(MultipartFile multipartFile, String lessonTitle) throws IOException {
 
-        Lesson lesson = createLessonFromFile(lessonTitle, multipartFile, 1L);
+        Long userId = getCurrentUserId();
+        Lesson lesson = createLessonFromFile(lessonTitle, multipartFile, userId);
         // Save Lesson metadata to db
         Lesson savedLesson = lessonRepository.save(lesson);
         //call FileUploadServiceApi to upload file to S3
@@ -52,25 +54,43 @@ public class LessonService {
         Lesson lesson = lessonRepository.findById(id)
                 .orElseThrow(() -> new LessonNotFoundException("Lesson with id: " + id + " not found"));
 
+        if (!lesson.getCreatedBy().equals(getCurrentUserId())) {
+            throw new RuntimeException("You don't have access to this lesson.");
+        }
+
         return LessonResponse.from(lesson);
     }
 
+//    public LessonsResponse getAll() {
+//        List<Lesson> lessons = lessonRepository.findAll();
+//        List<LessonResponse> lessonResponses = lessons.stream()
+//                .map(LessonResponse::from)
+//                .toList();
+//
+//        return LessonsResponse.from(lessonResponses);
+//    }
+
     public LessonsResponse getAll() {
-        List<Lesson> lessons = lessonRepository.findAll();
+        Long userId = getCurrentUserId();
+        List<Lesson> lessons = lessonRepository.findAllByCreatedBy(userId);
         List<LessonResponse> lessonResponses = lessons.stream()
                 .map(LessonResponse::from)
                 .toList();
 
         return LessonsResponse.from(lessonResponses);
     }
-
     public void deleteById(String key) {
         lessonFileService.deleteFile(key);
     }
 
+
     public String getLessonContent(Long id) {
         Lesson lesson = lessonRepository.findById(id)
                 .orElseThrow(() -> new LessonNotFoundException("Lesson with id: " + id + " not found"));
+
+        if (!lesson.getCreatedBy().equals(getCurrentUserId())) {
+            throw new RuntimeException("You don't have access to this lesson.");
+        }
 
         String fileKey = extractKeyFromUrl(lesson.getFileUrl());
 
@@ -84,5 +104,10 @@ public class LessonService {
 
         return path.substring(path.lastIndexOf('/') + 1); // → abc.txt
     }
+
+    private Long getCurrentUserId() {
+        return (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
 
 }
