@@ -27,7 +27,7 @@ public class Config {
                 .authorizeHttpRequests(auth -> auth
                         //.requestMatchers("/lessons?**").permitAll()
                         .anyRequest().permitAll())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                //.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 }

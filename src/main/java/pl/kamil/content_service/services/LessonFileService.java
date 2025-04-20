@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class LessonFileService {
 
     private final RestTemplate restTemplate;
-    private static final String FILE_UPLOAD_URL = "http://localhost:8080/files";
+    private static final String FILE_UPLOAD_URL = "http://localhost:8083/files";
 
     public FileUploadResponse uploadFile(MultipartFile file, long lessonId, long userId) {
         try {

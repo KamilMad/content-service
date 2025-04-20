@@ -22,37 +22,46 @@ public class LessonController {
     @PostMapping()
     public ResponseEntity<Long> createLesson(
             @RequestParam MultipartFile file,
-            @RequestParam String title) throws IOException {
+            @RequestParam String title,
+            @RequestHeader("X-User-Id") Long userId) throws IOException {
 
-        Long id = lessonService.createLesson(file, title);
+        Long id = lessonService.createLesson(file, title, userId);
 
         return ResponseEntity.ok().body(id);
     }
 
     @GetMapping
-    public ResponseEntity<LessonsResponse> getLessons() {
-        LessonsResponse response = lessonService.getAll();
+    public ResponseEntity<LessonsResponse> getLessons(@RequestHeader("X-User-Id") Long userId) {
+        LessonsResponse response = lessonService.getAll(userId);
 
         return ResponseEntity.ok().body(response);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<LessonResponse> getLessonById(@PathVariable Long id) {
-        LessonResponse response = lessonService.getById(id);
+    @GetMapping("/{lessonId}")
+    public ResponseEntity<LessonResponse> getLessonById(
+            @PathVariable Long lessonId,
+            @RequestHeader("X-User-Id") Long userId) {
+        LessonResponse response = lessonService.getById(lessonId, userId);
 
         return ResponseEntity.ok().body(response);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteLesson(@PathVariable Long id) {
-        lessonService.deleteById(id);
+    @DeleteMapping("/{lessonId}")
+    public ResponseEntity<Void> deleteLesson(
+            @PathVariable Long lessonId, @
+            RequestHeader("X-User-Id") Long userId) {
+
+        lessonService.deleteById(lessonId, userId);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @GetMapping("/{id}/content")
-    public ResponseEntity<String> getContent(@PathVariable Long id) {
-        String content = lessonService.getLessonContent(id);
+    public ResponseEntity<String> getContent(
+            @PathVariable Long id,
+            @RequestHeader("X-User-Id") Long userId) {
+
+        String content = lessonService.getLessonContent(id, userId);
 
         return ResponseEntity.ok().body(content);
     }

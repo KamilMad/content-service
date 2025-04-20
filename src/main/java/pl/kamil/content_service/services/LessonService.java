@@ -26,9 +26,8 @@ public class LessonService {
     private final LessonFileService lessonFileService;
     private final TextAnalysisService textAnalysisService;
 
-    public Long createLesson(MultipartFile multipartFile, String lessonTitle) throws IOException {
+    public Long createLesson(MultipartFile multipartFile, String lessonTitle, Long userId) {
 
-        Long userId = getCurrentUserId();
         Lesson lesson = createLessonFromFile(lessonTitle, multipartFile, userId);
         // Save Lesson metadata to db
         Lesson savedLesson = lessonRepository.save(lesson);
@@ -37,6 +36,48 @@ public class LessonService {
         updateLessonWithFileUrl(savedLesson, response.url());
 
         return savedLesson.getId();
+    }
+
+    public LessonResponse getById(Long lessonId, Long userId) {
+
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new LessonNotFoundException("Lesson with id: " + lessonId + " not found"));
+
+        validateOwnership(lesson, userId);
+
+        return LessonResponse.from(lesson);
+    }
+
+    public LessonsResponse getAll(Long userId) {
+        List<Lesson> lessons = lessonRepository.findAllByCreatedBy(userId);
+        List<LessonResponse> lessonResponses = lessons.stream()
+                .map(LessonResponse::from)
+                .toList();
+
+        return LessonsResponse.from(lessonResponses);
+    }
+
+    public void deleteById(Long lessonId, Long userId) {
+
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new LessonNotFoundException("Lesson with id: " + lessonId + " not found"));
+
+        validateOwnership(lesson, userId);
+
+        String fileKey = extractKeyFromUrl(lesson.getFileUrl());
+        lessonFileService.deleteFile(fileKey);
+        lessonRepository.deleteById(lessonId);
+    }
+
+    public String getLessonContent(Long lessonId, Long userId) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new LessonNotFoundException("Lesson with id: " + lessonId + " not found"));
+
+        validateOwnership(lesson, userId);
+
+        String fileKey = extractKeyFromUrl(lesson.getFileUrl());
+
+        return lessonFileService.getFileContent(fileKey);
     }
 
     private void updateLessonWithFileUrl(Lesson lesson, String url) {
@@ -50,57 +91,6 @@ public class LessonService {
         return Lesson.create(title,userId, totalWords);
     }
 
-    public LessonResponse getById(Long id) {
-
-        Lesson lesson = lessonRepository.findById(id)
-                .orElseThrow(() -> new LessonNotFoundException("Lesson with id: " + id + " not found"));
-
-        if (!lesson.getCreatedBy().equals(getCurrentUserId())) {
-            throw new RuntimeException("You don't have access to this lesson.");
-        }
-
-        return LessonResponse.from(lesson);
-    }
-
-    public LessonsResponse getAll() {
-        Long userId = getCurrentUserId();
-        List<Lesson> lessons = lessonRepository.findAllByCreatedBy(userId);
-        List<LessonResponse> lessonResponses = lessons.stream()
-                .map(LessonResponse::from)
-                .toList();
-
-        return LessonsResponse.from(lessonResponses);
-    }
-
-
-    public void deleteById(Long lessonId) {
-
-        Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new LessonNotFoundException("Lesson with id: " + lessonId + " not found"));
-
-        if (!lesson.getCreatedBy().equals(getCurrentUserId())) {
-            throw new AccessDeniedException("Not your lesson");
-        }
-
-        String fileKey = extractKeyFromUrl(lesson.getFileUrl());
-        lessonFileService.deleteFile(fileKey);
-        lessonRepository.deleteById(lessonId);
-    }
-
-    public String getLessonContent(Long id) {
-        Lesson lesson = lessonRepository.findById(id)
-                .orElseThrow(() -> new LessonNotFoundException("Lesson with id: " + id + " not found"));
-
-        if (!lesson.getCreatedBy().equals(getCurrentUserId())) {
-            throw new AccessDeniedException("Not your lesson");
-        }
-
-        String fileKey = extractKeyFromUrl(lesson.getFileUrl());
-
-        return lessonFileService.getFileContent(fileKey);
-    }
-
-
     private String extractKeyFromUrl(String url) {
         URI uri = URI.create(url);
         String path = uri.getPath(); // e.g. /lessons/abc.txt
@@ -108,9 +98,10 @@ public class LessonService {
         return path.substring(path.lastIndexOf('/') + 1); // → abc.txt
     }
 
-    private Long getCurrentUserId() {
-        return (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+    private void validateOwnership(Lesson lesson, Long userId) {
+        if (!lesson.getCreatedBy().equals(userId)) {
+            throw new AccessDeniedException("Not your lesson");
+        }
     }
-
-
 }
