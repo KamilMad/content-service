@@ -41,7 +41,7 @@ public class LessonService {
     public LessonResponse getById(Long lessonId, Long userId) {
 
         Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new LessonNotFoundException("Lesson with id: " + lessonId + " not found"));
+               .orElseThrow(() -> new LessonNotFoundException("Lesson not found"));
 
         validateOwnership(lesson, userId);
 
@@ -60,7 +60,7 @@ public class LessonService {
     public void deleteById(Long lessonId, Long userId) {
 
         Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new LessonNotFoundException("Lesson with id: " + lessonId + " not found"));
+                .orElseThrow(() -> new LessonNotFoundException("Lesson not found"));
 
         validateOwnership(lesson, userId);
 
@@ -71,7 +71,7 @@ public class LessonService {
 
     public String getLessonContent(Long lessonId, Long userId) {
         Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new LessonNotFoundException("Lesson with id: " + lessonId + " not found"));
+                .orElseThrow(() -> new LessonNotFoundException("Lesson not found"));
 
         validateOwnership(lesson, userId);
 

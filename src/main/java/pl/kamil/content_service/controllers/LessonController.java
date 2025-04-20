@@ -10,6 +10,7 @@ import pl.kamil.content_service.dtos.LessonsResponse;
 import pl.kamil.content_service.services.LessonService;
 
 import java.io.IOException;
+import java.net.URI;
 
 @CrossOrigin(origins = "http://127.0.0.1:5500")  // Allow frontend access
 @RestController
@@ -26,12 +27,15 @@ public class LessonController {
             @RequestHeader("X-User-Id") Long userId) throws IOException {
 
         Long id = lessonService.createLesson(file, title, userId);
+        URI location = URI.create("/lessons" + id);
 
-        return ResponseEntity.ok().body(id);
+        return ResponseEntity.created(location).body(id);
     }
 
     @GetMapping
-    public ResponseEntity<LessonsResponse> getLessons(@RequestHeader("X-User-Id") Long userId) {
+    public ResponseEntity<LessonsResponse> getLessons(
+            @RequestHeader("X-User-Id") Long userId) {
+
         LessonsResponse response = lessonService.getAll(userId);
 
         return ResponseEntity.ok().body(response);
@@ -48,12 +52,12 @@ public class LessonController {
 
     @DeleteMapping("/{lessonId}")
     public ResponseEntity<Void> deleteLesson(
-            @PathVariable Long lessonId, @
-            RequestHeader("X-User-Id") Long userId) {
+            @PathVariable Long lessonId,
+            @RequestHeader("X-User-Id") Long userId) {
 
         lessonService.deleteById(lessonId, userId);
 
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/content")
