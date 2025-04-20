@@ -42,4 +42,16 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
+
+    @ExceptionHandler(FileUploadException.class)
+    public ResponseEntity<ApiError> handleFileUploadException(FileUploadException e, HttpServletRequest request) {
+
+        ApiError error = new ApiError(
+                HttpStatus.BAD_GATEWAY.value(),
+                e.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(error);
+    }
 }

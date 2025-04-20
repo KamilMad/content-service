@@ -101,7 +101,7 @@ public class LessonService {
 
     private void validateOwnership(Lesson lesson, Long userId) {
         if (!lesson.getCreatedBy().equals(userId)) {
-            throw new AccessDeniedException("Not your lesson");
+            throw new AccessDeniedException("You do not have permission to access this lesson");
         }
     }
 }

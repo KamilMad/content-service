@@ -1,9 +1,7 @@
 package pl.kamil.content_service.services;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -13,6 +11,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.dtos.FileUploadResponse;
+import pl.kamil.content_service.exceptions.FileUploadException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,7 +33,7 @@ public class LessonFileService {
 
             return extractBody(response);
         } catch (IOException | RestClientException e) {
-            throw new RuntimeException("Failed to upload file", e);
+            throw new FileUploadException("Failed to upload file to storage service");
         }
     }
 
