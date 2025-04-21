@@ -1,12 +1,12 @@
 package pl.kamil.content_service.services;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.dtos.FileUploadResponse;
 import pl.kamil.content_service.dtos.LessonResponse;
 import pl.kamil.content_service.dtos.LessonsResponse;
+import pl.kamil.content_service.exceptions.AccessDeniedException;
 import pl.kamil.content_service.exceptions.LessonNotFoundException;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
@@ -24,6 +24,8 @@ public class LessonService {
     private final LessonRepository lessonRepository;
     private final LessonFileService lessonFileService;
 
+    private static final String lessonNotFound = "Lesson not found";
+
 
     public Long createLesson(MultipartFile multipartFile, String lessonTitle, Long userId) {
 
@@ -40,7 +42,7 @@ public class LessonService {
     public LessonResponse getById(Long lessonId, Long userId) {
 
         Lesson lesson = lessonRepository.findById(lessonId)
-               .orElseThrow(() -> new LessonNotFoundException("Lesson not found"));
+               .orElseThrow(() -> new LessonNotFoundException(lessonNotFound));
 
         validateOwnership(lesson, userId);
 
@@ -59,7 +61,7 @@ public class LessonService {
     public void deleteById(Long lessonId, Long userId) {
 
         Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new LessonNotFoundException("Lesson not found"));
+                .orElseThrow(() -> new LessonNotFoundException(lessonNotFound));
 
         validateOwnership(lesson, userId);
 
@@ -70,7 +72,7 @@ public class LessonService {
 
     public String getLessonContent(Long lessonId, Long userId) {
         Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new LessonNotFoundException("Lesson not found"));
+                .orElseThrow(() -> new LessonNotFoundException(lessonNotFound));
 
         validateOwnership(lesson, userId);
 

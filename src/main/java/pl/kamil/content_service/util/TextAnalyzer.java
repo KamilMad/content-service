@@ -7,7 +7,6 @@ import pl.kamil.content_service.exceptions.FileProcessingException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-@Component
 public class TextAnalyzer {
 
     public static long countWordsInFile(MultipartFile multipartFile) {

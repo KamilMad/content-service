@@ -27,7 +27,7 @@ public class LessonController {
             @RequestHeader("X-User-Id") Long userId) throws IOException {
 
         Long id = lessonService.createLesson(file, title, userId);
-        URI location = URI.create("/lessons" + id);
+        URI location = URI.create("/lessons/" + id);
 
         return ResponseEntity.created(location).body(id);
     }

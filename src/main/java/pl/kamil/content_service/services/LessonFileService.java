@@ -111,7 +111,7 @@ public class LessonFileService {
             return reader.lines().collect(Collectors.joining("\n"));
 
         } catch (RestClientException | IOException e) {
-            throw new RuntimeException("Failed to fetch file content with key " + fileKey, e);
+            throw new FileStorageException("Failed to fetch file content with key " + fileKey, e);
         }
     }
 
