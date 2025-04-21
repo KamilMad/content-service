@@ -3,6 +3,7 @@ package pl.kamil.content_service.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import pl.kamil.content_service.common.ErrorMessages;
 import pl.kamil.content_service.dtos.FileUploadResponse;
 import pl.kamil.content_service.dtos.LessonResponse;
 import pl.kamil.content_service.dtos.LessonsResponse;
@@ -24,7 +25,6 @@ public class LessonService {
     private final LessonRepository lessonRepository;
     private final LessonFileService lessonFileService;
 
-    private static final String lessonNotFound = "Lesson not found";
 
 
     public Long createLesson(MultipartFile multipartFile, String lessonTitle, Long userId) {
@@ -42,7 +42,7 @@ public class LessonService {
     public LessonResponse getById(Long lessonId, Long userId) {
 
         Lesson lesson = lessonRepository.findById(lessonId)
-               .orElseThrow(() -> new LessonNotFoundException(lessonNotFound));
+               .orElseThrow(() -> new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
 
         validateOwnership(lesson, userId);
 
@@ -61,7 +61,7 @@ public class LessonService {
     public void deleteById(Long lessonId, Long userId) {
 
         Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new LessonNotFoundException(lessonNotFound));
+                .orElseThrow(() -> new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
 
         validateOwnership(lesson, userId);
 
@@ -72,7 +72,7 @@ public class LessonService {
 
     public String getLessonContent(Long lessonId, Long userId) {
         Lesson lesson = lessonRepository.findById(lessonId)
-                .orElseThrow(() -> new LessonNotFoundException(lessonNotFound));
+                .orElseThrow(() -> new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
 
         validateOwnership(lesson, userId);
 
@@ -102,7 +102,7 @@ public class LessonService {
 
     private void validateOwnership(Lesson lesson, Long userId) {
         if (!lesson.getCreatedBy().equals(userId)) {
-            throw new AccessDeniedException("You do not have permission to access this lesson");
+            throw new AccessDeniedException(ErrorMessages.ACCESS_DENIED);
         }
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import pl.kamil.content_service.common.ErrorMessages;
 import pl.kamil.content_service.dtos.FileUploadResponse;
 import pl.kamil.content_service.exceptions.FileStorageException;
 import pl.kamil.content_service.exceptions.FileUploadException;
@@ -34,7 +35,7 @@ public class LessonFileService {
 
             return extractBody(response);
         } catch (IOException | RestClientException e) {
-            throw new FileUploadException("Failed to upload file to storage service");
+            throw new FileUploadException(ErrorMessages.FILE_UPLOAD_FAILED);
         }
     }
 
@@ -51,8 +52,7 @@ public class LessonFileService {
 
     private FileUploadResponse extractBody(ResponseEntity<FileUploadResponse> response) {
         if(!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-            throw new FileUploadException("Invalid response from storage service: " +
-                    response.getStatusCode().value());
+            throw new FileUploadException(ErrorMessages.FILE_STORAGE_RESPONSE_INVALID);
         }
 
         return response.getBody();
@@ -86,7 +86,7 @@ public class LessonFileService {
         try{
             restTemplate.delete(FILE_UPLOAD_URL + "/" + key);
         } catch (RestClientException e) {
-            throw new FileStorageException("Cannot delete a file with key " + key,e);
+            throw new FileStorageException(String.format(ErrorMessages.FILE_DELETE_FAILED, key),e);
         }
     }
 
@@ -102,7 +102,7 @@ public class LessonFileService {
         );
 
         if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-            throw new FileStorageException("Invalid response from file storage service");
+            throw new FileStorageException(ErrorMessages.FILE_STORAGE_RESPONSE_INVALID);
         }
 
         try (InputStream is = response.getBody().getInputStream();
@@ -111,7 +111,7 @@ public class LessonFileService {
             return reader.lines().collect(Collectors.joining("\n"));
 
         } catch (RestClientException | IOException e) {
-            throw new FileStorageException("Failed to fetch file content with key " + fileKey, e);
+            throw new FileStorageException(String.format(ErrorMessages.FILE_CONTENT_FETCH_FAILED ,fileKey), e);
         }
     }
 
