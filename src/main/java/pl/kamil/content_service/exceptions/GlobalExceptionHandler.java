@@ -66,4 +66,16 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(error);
     }
+
+    @ExceptionHandler(FileProcessingException.class)
+    public ResponseEntity<ApiError> handleFileProcessingException(FileProcessingException e, HttpServletRequest request) {
+
+        ApiError error = new ApiError(
+                HttpStatus.BAD_REQUEST.value(),
+                e.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
 }

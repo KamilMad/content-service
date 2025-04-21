@@ -2,6 +2,7 @@ package pl.kamil.content_service.services;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import pl.kamil.content_service.exceptions.FileProcessingException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +23,7 @@ public class TextAnalysisService {
         try {
             return new String(multipartFile.getBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to decode file", e);
+            throw new FileProcessingException("Failed to decode uploaded file", e);
         }
     }
 

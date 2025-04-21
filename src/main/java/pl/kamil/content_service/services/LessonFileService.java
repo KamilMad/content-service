@@ -86,11 +86,12 @@ public class LessonFileService {
         try{
             restTemplate.delete(FILE_UPLOAD_URL + "/" + key);
         } catch (RestClientException e) {
-            throw new FileStorageException("Cannot delete a file",e);
+            throw new FileStorageException("Cannot delete a file with key " + key,e);
         }
     }
 
     public String getFileContent(String fileKey) {
+
         String url = FILE_UPLOAD_URL + "/" + fileKey;
 
         ResponseEntity<Resource> response = restTemplate.exchange(
@@ -100,13 +101,17 @@ public class LessonFileService {
                 Resource.class
         );
 
+        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+            throw new FileStorageException("Invalid response from file storage service");
+        }
+
         try (InputStream is = response.getBody().getInputStream();
              BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 
             return reader.lines().collect(Collectors.joining("\n"));
 
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read file content", e);
+        } catch (RestClientException | IOException e) {
+            throw new RuntimeException("Failed to fetch file content with key " + fileKey, e);
         }
     }
 
