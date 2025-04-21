@@ -2,7 +2,6 @@ package pl.kamil.content_service.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.dtos.FileUploadResponse;
@@ -11,8 +10,8 @@ import pl.kamil.content_service.dtos.LessonsResponse;
 import pl.kamil.content_service.exceptions.LessonNotFoundException;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
+import pl.kamil.content_service.util.TextAnalyzer;
 
-import java.io.IOException;
 import java.net.URI;
 import java.time.Instant;
 import java.util.List;
@@ -24,7 +23,7 @@ public class LessonService {
 
     private final LessonRepository lessonRepository;
     private final LessonFileService lessonFileService;
-    private final TextAnalysisService textAnalysisService;
+
 
     public Long createLesson(MultipartFile multipartFile, String lessonTitle, Long userId) {
 
@@ -87,7 +86,7 @@ public class LessonService {
     }
 
     private Lesson createLessonFromFile(String title, MultipartFile file, Long userId) {
-        long totalWords = textAnalysisService.countWordsInFile(file);
+        long totalWords = TextAnalyzer.countWordsInFile(file);
         return Lesson.create(title,userId, totalWords);
     }
 

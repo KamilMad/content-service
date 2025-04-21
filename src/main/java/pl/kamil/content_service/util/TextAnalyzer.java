@@ -1,4 +1,4 @@
-package pl.kamil.content_service.services;
+package pl.kamil.content_service.util;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -8,9 +8,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Component
-public class TextAnalysisService {
+public class TextAnalyzer {
 
-    public long countWordsInFile(MultipartFile multipartFile) {
+    public static long countWordsInFile(MultipartFile multipartFile) {
 
         String content = decodeFile(multipartFile);
 
@@ -19,7 +19,7 @@ public class TextAnalysisService {
         return words.length;
     }
 
-    private String decodeFile(MultipartFile multipartFile) {
+    private static String decodeFile(MultipartFile multipartFile) {
         try {
             return new String(multipartFile.getBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
