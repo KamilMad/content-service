@@ -54,4 +54,16 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(error);
     }
+
+    @ExceptionHandler(FileStorageException.class)
+    public ResponseEntity<ApiError> handleFileStorageException(FileStorageException e, HttpServletRequest request) {
+
+        ApiError error = new ApiError(
+                HttpStatus.BAD_GATEWAY.value(),
+                e.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(error);
+    }
 }

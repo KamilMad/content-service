@@ -11,6 +11,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.dtos.FileUploadResponse;
+import pl.kamil.content_service.exceptions.FileStorageException;
 import pl.kamil.content_service.exceptions.FileUploadException;
 
 import java.io.BufferedReader;
@@ -48,9 +49,10 @@ public class LessonFileService {
         return restTemplate.postForEntity(FILE_UPLOAD_URL, request, FileUploadResponse.class);
     }
 
-    private FileUploadResponse extractBody(ResponseEntity<FileUploadResponse> response) throws FileUploadException {
+    private FileUploadResponse extractBody(ResponseEntity<FileUploadResponse> response) {
         if(!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-            throw new FileUploadException("Failed to upload file");
+            throw new FileUploadException("Invalid response from storage service: " +
+                    response.getStatusCode().value());
         }
 
         return response.getBody();
@@ -81,7 +83,11 @@ public class LessonFileService {
     }
 
     public void deleteFile(String key) {
-        restTemplate.delete(FILE_UPLOAD_URL + "/" + key);
+        try{
+            restTemplate.delete(FILE_UPLOAD_URL + "/" + key);
+        } catch (RestClientException e) {
+            throw new FileStorageException("Cannot delete a file",e);
+        }
     }
 
     public String getFileContent(String fileKey) {
