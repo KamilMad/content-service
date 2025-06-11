@@ -23,7 +23,10 @@ public class Lesson {
     private Instant updated_at;
 
     private Long createdBy;
-    private String fileUrl;
+    @Column(length = 2048)
+    private String preSignedUrl;
+
+    private String s3Key;
 
     public static Lesson create(String title, Long userId, long totalWords) {
         Lesson lesson = new Lesson();

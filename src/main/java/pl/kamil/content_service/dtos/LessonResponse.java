@@ -9,7 +9,8 @@ public record LessonResponse(
     String title,
     long totalWords,
     String fileUrl,
-    Instant created_at
+    Instant created_at,
+    String s3Key
 ) {
 
     public static LessonResponse from(Lesson lesson) {
@@ -17,8 +18,9 @@ public record LessonResponse(
                 lesson.getId(),
                 lesson.getTitle(),
                 lesson.getTotal_words(),
-                lesson.getFileUrl(),
-                lesson.getCreated_at()
+                lesson.getPreSignedUrl(),
+                lesson.getCreated_at(),
+                lesson.getS3Key()
         );
     }
 }

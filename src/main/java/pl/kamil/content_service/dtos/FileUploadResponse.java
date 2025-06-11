@@ -5,5 +5,6 @@ public record FileUploadResponse(
         String originalName,
         String contentType,
         long size,
-        String url
+        String preSignedUrl,
+        String objectKey
 ) { }

@@ -1,6 +1,7 @@
 package pl.kamil.content_service.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -26,7 +27,10 @@ import java.util.stream.Collectors;
 public class LessonFileService {
 
     private final RestTemplate restTemplate;
-    private static final String FILE_UPLOAD_URL = "http://localhost:8083/files";
+    //private static final String FILE_UPLOAD_URL = "http://localhost:8083/files";
+
+    @Value("${file.upload.url}")
+    private String FILE_UPLOAD_URL;
 
     public FileUploadResponse uploadFile(MultipartFile file, long lessonId, long userId) {
         try {

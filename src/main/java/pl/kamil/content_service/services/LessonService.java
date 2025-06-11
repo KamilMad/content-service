@@ -34,7 +34,7 @@ public class LessonService {
         Lesson savedLesson = lessonRepository.save(lesson);
         //call FileUploadServiceApi to upload file to S3
         FileUploadResponse response = lessonFileService.uploadFile(multipartFile, savedLesson.getId(), savedLesson.getCreatedBy());
-        updateLessonWithFileUrl(savedLesson, response.url());
+        updateLessonWithFileUrlAndS3Key(savedLesson, response.preSignedUrl(), response.objectKey());
 
         return savedLesson.getId();
     }
@@ -65,7 +65,7 @@ public class LessonService {
 
         validateOwnership(lesson, userId);
 
-        String fileKey = extractKeyFromUrl(lesson.getFileUrl());
+        String fileKey = extractKeyFromUrl(lesson.getPreSignedUrl());
         lessonFileService.deleteFile(fileKey);
         lessonRepository.deleteById(lessonId);
     }
@@ -76,14 +76,16 @@ public class LessonService {
 
         validateOwnership(lesson, userId);
 
-        String fileKey = extractKeyFromUrl(lesson.getFileUrl());
+        String fileKey = extractKeyFromUrl(lesson.getPreSignedUrl());
 
         return lessonFileService.getFileContent(fileKey);
     }
 
-    private void updateLessonWithFileUrl(Lesson lesson, String url) {
-        lesson.setFileUrl(url);
+    private void updateLessonWithFileUrlAndS3Key(Lesson lesson, String url, String objectKey) {
+        lesson.setPreSignedUrl(url);
+        lesson.setS3Key(objectKey);
         lesson.setUpdated_at(Instant.now());
+
         lessonRepository.save(lesson);
     }
 
