@@ -1,7 +1,6 @@
 package pl.kamil.content_service.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,7 +9,6 @@ import pl.kamil.content_service.dtos.LessonsResponse;
 import pl.kamil.content_service.services.LessonService;
 
 import java.io.IOException;
-import java.net.URI;
 
 @CrossOrigin(origins = "http://127.0.0.1:5500")  // Allow frontend access
 @RestController
@@ -22,14 +20,12 @@ public class LessonController {
 
     @PostMapping()
     public ResponseEntity<Long> createLesson(
-            @RequestParam MultipartFile file,
-            @RequestParam String title,
+            @RequestParam("file") MultipartFile file,
             @RequestHeader("X-User-Id") Long userId) throws IOException {
 
-        Long id = lessonService.createLesson(file, title, userId);
-        URI location = URI.create("/lessons/" + id);
+        Long id = lessonService.createLesson(file, userId);
 
-        return ResponseEntity.created(location).body(id);
+        return ResponseEntity.ok().body(id);
     }
 
     @GetMapping

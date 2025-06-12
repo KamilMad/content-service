@@ -12,8 +12,6 @@ import pl.kamil.content_service.exceptions.LessonNotFoundException;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
 import pl.kamil.content_service.util.TextAnalyzer;
-
-import java.net.URI;
 import java.time.Instant;
 import java.util.List;
 
@@ -26,15 +24,15 @@ public class LessonService {
     private final LessonFileService lessonFileService;
 
 
+    public Long createLesson(MultipartFile file, long userId) {
 
-    public Long createLesson(MultipartFile multipartFile, String lessonTitle, Long userId) {
-
-        Lesson lesson = createLessonFromFile(lessonTitle, multipartFile, userId);
-        // Save Lesson metadata to db
-        Lesson savedLesson = lessonRepository.save(lesson);
         //call FileUploadServiceApi to upload file to S3
-        FileUploadResponse response = lessonFileService.uploadFile(multipartFile, savedLesson.getId(), savedLesson.getCreatedBy());
-        updateLessonWithFileUrlAndS3Key(savedLesson, response.preSignedUrl(), response.objectKey());
+        FileUploadResponse response = lessonFileService.uploadFile(file);
+        System.out.println(response.s3Key());
+
+        Lesson lesson = createLessonFromFile(file, userId);
+        updateLessonWithS3Key(lesson, response.s3Key());
+        Lesson savedLesson = lessonRepository.save(lesson);
 
         return savedLesson.getId();
     }
@@ -42,7 +40,7 @@ public class LessonService {
     public LessonResponse getById(Long lessonId, Long userId) {
 
         Lesson lesson = lessonRepository.findById(lessonId)
-               .orElseThrow(() -> new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
+                .orElseThrow(() -> new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
 
         validateOwnership(lesson, userId);
 
@@ -65,7 +63,7 @@ public class LessonService {
 
         validateOwnership(lesson, userId);
 
-        String fileKey = extractKeyFromUrl(lesson.getPreSignedUrl());
+        String fileKey = lesson.getS3Key();
         lessonFileService.deleteFile(fileKey);
         lessonRepository.deleteById(lessonId);
     }
@@ -76,31 +74,22 @@ public class LessonService {
 
         validateOwnership(lesson, userId);
 
-        String fileKey = extractKeyFromUrl(lesson.getPreSignedUrl());
+        String fileKey = lesson.getS3Key();
 
         return lessonFileService.getFileContent(fileKey);
     }
 
-    private void updateLessonWithFileUrlAndS3Key(Lesson lesson, String url, String objectKey) {
-        lesson.setPreSignedUrl(url);
-        lesson.setS3Key(objectKey);
+    private void updateLessonWithS3Key(Lesson lesson, String key) {
+        lesson.setS3Key(key);
         lesson.setUpdated_at(Instant.now());
 
         lessonRepository.save(lesson);
     }
 
-    private Lesson createLessonFromFile(String title, MultipartFile file, Long userId) {
+    private Lesson createLessonFromFile(MultipartFile file, Long userId) {
         long totalWords = TextAnalyzer.countWordsInFile(file);
-        return Lesson.create(title,userId, totalWords);
+        return Lesson.create(file.getOriginalFilename(), userId, totalWords);
     }
-
-    private String extractKeyFromUrl(String url) {
-        URI uri = URI.create(url);
-        String path = uri.getPath(); // e.g. /lessons/abc.txt
-
-        return path.substring(path.lastIndexOf('/') + 1); // → abc.txt
-    }
-
 
     private void validateOwnership(Lesson lesson, Long userId) {
         if (!lesson.getCreatedBy().equals(userId)) {

@@ -23,16 +23,13 @@ public class Lesson {
     private Instant updated_at;
 
     private Long createdBy;
-    @Column(length = 2048)
-    private String preSignedUrl;
-
     private String s3Key;
 
-    public static Lesson create(String title, Long userId, long totalWords) {
+    public static Lesson create(String title, Long userId, long total_words) {
         Lesson lesson = new Lesson();
         lesson.setTitle(title);
+        lesson.setTotal_words(total_words);
         lesson.setCreatedBy(userId);
-        lesson.setTotal_words(totalWords);
         lesson.setCreated_at(Instant.now());
         lesson.setUpdated_at(Instant.now());
         return lesson;
