@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.client.RestClientException;
 import pl.kamil.content_service.dtos.FileUploadResponse;
+import pl.kamil.content_service.exceptions.FileProcessingException;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
 
@@ -106,5 +107,54 @@ public class LessonServiceTest {
         verify(lessonFileService).uploadFile(mockFile);
     }
 
+    @Test
+    void shouldThrowException_WhenProblemWithReadingFile() {
+        // Given
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file",
+                "test.txt",
+                "text/plain",
+                "Hello, World!".getBytes()
+        );
+        long userId = 1L;
+
+        when(lessonFileService.uploadFile(mockFile)).thenThrow(new FileProcessingException("Failed to read file content"));
+
+        // When
+
+        Exception exception = assertThrows(FileProcessingException.class,
+                () -> lessonService.createLesson(mockFile, userId));
+        //Then
+        assertTrue(exception.getMessage().contains("Failed to read file content"));
+        verify(lessonRepository, never()).save(any());
+        verify(lessonFileService).uploadFile(mockFile);
+    }
+
+    @Test
+    void shouldSaveLessonWithCorrectUserIdAndS3key() {
+        // Given
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "file",
+                "test.txt",
+                "text/plain",
+                "Hello, World!".getBytes());
+        long userId = 1L;
+
+        when(lessonFileService.uploadFile(mockFile)).thenReturn(new FileUploadResponse("s3key"));
+
+        // Mock the repository save to return something
+        Lesson mockSavedLesson = new Lesson();
+        mockSavedLesson.setId(42L);
+        when(lessonRepository.save(any(Lesson.class))).thenReturn(mockSavedLesson);
+
+        // When
+        lessonService.createLesson(mockFile, userId);
+
+        // Then
+        verify(lessonRepository).save(argThat(lesson ->
+                lesson.getCreatedBy() == userId &&
+                lesson.getS3Key().equals("s3key")));
+
+    }
 
 }
