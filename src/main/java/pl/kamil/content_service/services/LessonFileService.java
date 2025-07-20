@@ -35,9 +35,19 @@ public class LessonFileService {
     public FileUploadResponse uploadFile(MultipartFile file) {
         String url = buildUploadUrl();
         HttpEntity<MultiValueMap<String, Object>> request = createMultipartRequest(file);
+     try {
+         ResponseEntity<FileUploadResponse> response = restTemplate.postForEntity(url, request, FileUploadResponse.class);
 
-        ResponseEntity<FileUploadResponse> response = restTemplate.postForEntity(url, request, FileUploadResponse.class);
-        return response.getBody();
+         if (response.getBody() == null || !response.getStatusCode().is2xxSuccessful()) {
+             throw new FileStorageException(ErrorMessages.FILE_STORAGE_RESPONSE_INVALID);
+         }
+
+         return response.getBody();
+
+     } catch (RestClientException e) {
+        throw new FileStorageException(ErrorMessages.FILE_UPLOAD_FAILED, e);
+     }
+
     }
 
     public void deleteFile(String key) {
