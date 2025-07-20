@@ -15,6 +15,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
 import pl.kamil.content_service.common.ErrorMessages;
 import pl.kamil.content_service.dtos.FileUploadResponse;
+import pl.kamil.content_service.exceptions.FileProcessingException;
 import pl.kamil.content_service.exceptions.FileStorageException;
 
 import java.io.BufferedReader;
@@ -113,7 +114,7 @@ public class LessonFileService {
             HttpEntity<byte[]> filePart = new HttpEntity<>(file.getBytes(), filePartHeaders);
             body.add("file", filePart);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read file content", e);
+            throw new FileProcessingException("Failed to read file content", e);
         }
 
         return new HttpEntity<>(body, headers);
