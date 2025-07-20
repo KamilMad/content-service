@@ -26,6 +26,10 @@ public class LessonService {
 
     public Long createLesson(MultipartFile file, long userId) {
 
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("File must not be null or empty");
+        }
+
         //call FileUploadServiceApi to upload file to S3
         FileUploadResponse response = lessonFileService.uploadFile(file);
 

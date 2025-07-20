@@ -39,7 +39,7 @@ public class LessonServiceTest {
                 "text/plain",
                 "Hello, World!".getBytes()
         );
-        Long userId = 1L;
+        long userId = 1L;
 
         FileUploadResponse response = new FileUploadResponse("s3key");
         Lesson mockLesson = new Lesson();
@@ -57,4 +57,6 @@ public class LessonServiceTest {
         verify(lessonRepository).save(any(Lesson.class));
 
     }
+
+    // Invalid or null file. Should thrown
 }

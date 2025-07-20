@@ -37,7 +37,6 @@ public class LessonFileService {
         HttpEntity<MultiValueMap<String, Object>> request = createMultipartRequest(file);
 
         ResponseEntity<FileUploadResponse> response = restTemplate.postForEntity(url, request, FileUploadResponse.class);
-        System.out.println("LessonFileService:uploadFile()" + response.getBody().s3Key());
         return response.getBody();
     }
 
