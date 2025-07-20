@@ -28,7 +28,6 @@ public class LessonService {
 
         //call FileUploadServiceApi to upload file to S3
         FileUploadResponse response = lessonFileService.uploadFile(file);
-        System.out.println(response.s3Key());
 
         Lesson lesson = createLessonFromFile(file, userId);
         updateLessonWithS3Key(lesson, response.s3Key());
@@ -82,8 +81,6 @@ public class LessonService {
     private void updateLessonWithS3Key(Lesson lesson, String key) {
         lesson.setS3Key(key);
         lesson.setUpdated_at(Instant.now());
-
-        lessonRepository.save(lesson);
     }
 
     private Lesson createLessonFromFile(MultipartFile file, Long userId) {

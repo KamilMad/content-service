@@ -93,12 +93,16 @@ public class LessonFileService {
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         try {
-            body.add("file", new ByteArrayResource(file.getBytes()) {
-                @Override
-                public String getFilename() {
-                    return file.getOriginalFilename();
-                }
-            });
+            HttpHeaders filePartHeaders = new HttpHeaders();
+            filePartHeaders.setContentDisposition(ContentDisposition
+                    .builder("form-data")
+                    .name("file")
+                    .filename(file.getOriginalFilename())
+                    .build());
+            filePartHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+            HttpEntity<byte[]> filePart = new HttpEntity<>(file.getBytes(), filePartHeaders);
+            body.add("file", filePart);
         } catch (IOException e) {
             throw new RuntimeException("Failed to read file content", e);
         }
@@ -106,4 +110,6 @@ public class LessonFileService {
         return new HttpEntity<>(body, headers);
     }
 
+
 }
+

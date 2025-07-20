@@ -1,6 +1,7 @@
 package pl.kamil.content_service.controllers;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +19,7 @@ public class LessonController {
 
     private final LessonService lessonService;
 
-    @PostMapping()
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Long> createLesson(
             @RequestParam("file") MultipartFile file,
             @RequestHeader("X-User-Id") Long userId) throws IOException {
