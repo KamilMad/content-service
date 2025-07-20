@@ -97,4 +97,5 @@ public class LessonService {
             throw new AccessDeniedException(ErrorMessages.ACCESS_DENIED);
         }
     }
+
 }
