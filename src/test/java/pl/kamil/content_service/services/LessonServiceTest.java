@@ -6,16 +6,21 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataAccessException;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.client.RestClientException;
 import pl.kamil.content_service.dtos.FileUploadResponse;
 import pl.kamil.content_service.dtos.LessonResponse;
+import pl.kamil.content_service.dtos.LessonsResponse;
 import pl.kamil.content_service.exceptions.AccessDeniedException;
 import pl.kamil.content_service.exceptions.FileProcessingException;
 import pl.kamil.content_service.exceptions.LessonNotFoundException;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -208,5 +213,60 @@ public class LessonServiceTest {
         assertTrue(exception.getMessage().contains("You do not have permission to access this lesson"));
 
     }
+
+    @Test
+    void shouldSuccessfullyGetAllLessonsForProvidedUserId() {
+        // Given
+        long userId = 1L;
+        Lesson lesson1 =  Lesson.create("title1", userId, 100);
+        lesson1.setS3Key("s3Key");
+        Lesson lesson2 =  Lesson.create("title2", userId, 200);
+        lesson2.setS3Key("s3Key");
+        List<Lesson> lessons = List.of(lesson1, lesson2);
+
+        when(lessonRepository.findAllByCreatedBy(userId)).thenReturn(lessons);
+
+        // When
+        LessonsResponse response = lessonService.getAll(userId);
+
+        // Then
+        assertEquals(response.total(), lessons.size());
+
+        assertEquals(lessons.get(0).getTitle(), response.lessons().get(0).title());
+        assertEquals(lessons.get(0).getTotal_words(), response.lessons().get(0).totalWords());
+        assertEquals(lessons.get(0).getS3Key(), response.lessons().get(0).s3Key());
+
+
+        assertEquals(lessons.get(1).getTitle(), response.lessons().get(1).title());
+        assertEquals(lessons.get(1).getTotal_words(), response.lessons().get(1).totalWords());
+        assertEquals(lessons.get(1).getS3Key(), response.lessons().get(1).s3Key());
+
+    }
+
+    @Test
+    void shouldReturnEmptyList_WhenNoLessonExist() {
+        // Given
+        long userId = 1L;
+        when(lessonRepository.findAllByCreatedBy(userId)).thenReturn(Collections.emptyList());
+
+        // When
+        LessonsResponse response = lessonService.getAll(userId);
+
+        // Then
+        assertNotNull(response);
+        assertTrue(response.lessons().isEmpty());
+        assertEquals(0, response.total());
+    }
+
+    @Test
+    void shouldThrowException_WhenDBFails() {
+        long userId = 1L;
+        RuntimeException dbException = new RuntimeException("DB egirror");
+        when(lessonRepository.findAllByCreatedBy(userId)).thenThrow(dbException);
+
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> lessonService.getAll(userId));
+        assertEquals("DB error", thrown.getMessage());
+    }
+
 
 }
