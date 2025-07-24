@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataAccessException;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.client.RestClientException;
 import pl.kamil.content_service.common.ErrorMessages;
@@ -19,8 +18,6 @@ import pl.kamil.content_service.exceptions.LessonNotFoundException;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
 
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -321,4 +318,62 @@ public class LessonServiceTest {
         verifyNoInteractions(lessonFileService);
         verify(lessonRepository, never()).deleteById(lessonId);
     }
+
+    // successfully get lesson content when valid user
+    @Test
+    void getLessonContent_shouldReturnLessonContent_WhenValidOwner() {
+        long lessonId = 1L;
+        long userId = 100L;
+        Lesson lesson = Lesson.create( "title", userId, 100);
+        lesson.setId(lessonId);
+        lesson.setS3Key("s3Key");
+
+        String fileContent = " =File content";
+
+        when(lessonRepository.findById(lessonId)).thenReturn(Optional.of(lesson));
+        when(lessonFileService.getFileContent("s3Key")).thenReturn(fileContent);
+
+        String content = lessonService.getLessonContent(lessonId, userId);
+
+        assertEquals(fileContent, content);
+        verify(lessonRepository).findById(lessonId);
+        verify(lessonFileService).getFileContent("s3Key");
+
+    }
+    // throw exception when invalid user
+    @Test
+    void getLessonContent_shouldThrowException_WhenInvalidOwner() {
+        // Given
+        long lessonId = 1L;
+        long ownerUserId = 100L;
+        Lesson lesson = Lesson.create( "title", ownerUserId, 100);
+        lesson.setId(lessonId);
+        lesson.setS3Key("s3Key");
+
+        long wrongUserId = 200L;
+        when(lessonRepository.findById(lessonId)).thenReturn(Optional.of(lesson));
+
+        // When
+        Exception ex = assertThrows(AccessDeniedException.class,
+                () -> lessonService.getLessonContent(lessonId, wrongUserId));
+
+        // Then
+        assertEquals(ErrorMessages.ACCESS_DENIED, ex.getMessage());
+        verify(lessonFileService, never()).getFileContent(anyString());
+    }
+
+    @Test
+    void getLessonContent_shouldThrowException_WhenLessonNotFound() {
+        long lessonId = 1L;
+        long userId = 100L;
+        when(lessonRepository.findById(any())).thenReturn(Optional.empty());
+
+        Exception ex = assertThrows(LessonNotFoundException.class,
+                () -> lessonService.getLessonContent(lessonId, userId));
+
+        assertEquals(ErrorMessages.LESSON_NOT_FOUND, ex.getMessage());
+        verify(lessonFileService, never()).getFileContent(anyString());
+
+    }
+    // throw exception lesson not found
 }
