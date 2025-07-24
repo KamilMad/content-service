@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessException;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.client.RestClientException;
+import pl.kamil.content_service.common.ErrorMessages;
 import pl.kamil.content_service.dtos.FileUploadResponse;
 import pl.kamil.content_service.dtos.LessonResponse;
 import pl.kamil.content_service.dtos.LessonsResponse;
@@ -18,6 +19,7 @@ import pl.kamil.content_service.exceptions.LessonNotFoundException;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -261,12 +263,62 @@ public class LessonServiceTest {
     @Test
     void shouldThrowException_WhenDBFails() {
         long userId = 1L;
-        RuntimeException dbException = new RuntimeException("DB egirror");
+        RuntimeException dbException = new RuntimeException("DB error");
         when(lessonRepository.findAllByCreatedBy(userId)).thenThrow(dbException);
 
         RuntimeException thrown = assertThrows(RuntimeException.class, () -> lessonService.getAll(userId));
         assertEquals("DB error", thrown.getMessage());
     }
 
+    @Test
+    void shouldDeleteLesson_WhenUserIsOwner() {
+        long lessonId = 1L;
+        long userId = 100L;
+        Lesson lesson = Lesson.create( "title", userId, 100);
+        lesson.setId(lessonId);
+        lesson.setS3Key("s3Key");
+        when(lessonRepository.findById(lessonId)).thenReturn(Optional.of(lesson));
 
+        lessonService.deleteById(lessonId, userId);
+
+        verify(lessonFileService).deleteFile("s3Key");
+        verify(lessonRepository).deleteById(lessonId);
+    }
+
+    @Test
+    void shouldThrowLessonNotFoundException_WhenLessonDoesNotExist() {
+        // Given
+        Long lessonId = 1L;
+        Long userId = 100L;
+
+        when(lessonRepository.findById(lessonId)).thenReturn(Optional.empty());
+
+        // When
+        Exception ex = assertThrows(LessonNotFoundException.class,
+                () -> lessonService.deleteById(lessonId, userId));
+
+        // Then
+        assertEquals(ErrorMessages.LESSON_NOT_FOUND, ex.getMessage());
+        verifyNoInteractions(lessonFileService);
+        verify(lessonRepository,never()).deleteById(lessonId);
+    }
+
+    @Test
+    void shouldThrowAccessDeniedException_WhenUserIsNotOwner() {
+        // Given
+        long lessonId = 1L;
+        long userId = 100L;
+        long wrongUserId = 200L;
+        Lesson lesson = Lesson.create( "title", userId, 100);
+        lesson.setId(lessonId);
+        lesson.setS3Key("s3Key");
+        when(lessonRepository.findById(lessonId)).thenReturn(Optional.of(lesson));
+
+        Exception ex = assertThrows(AccessDeniedException.class,
+                () -> lessonService.deleteById(lessonId, wrongUserId));
+
+        assertEquals(ErrorMessages.ACCESS_DENIED, ex.getMessage());
+        verifyNoInteractions(lessonFileService);
+        verify(lessonRepository, never()).deleteById(lessonId);
+    }
 }
