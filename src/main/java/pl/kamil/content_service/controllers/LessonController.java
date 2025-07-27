@@ -24,6 +24,10 @@ public class LessonController {
             @RequestParam("file") MultipartFile file,
             @RequestHeader("X-User-Id") Long userId) throws IOException {
 
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("File must not be null or empty");
+        }
+
         Long id = lessonService.createLesson(file, userId);
 
         return ResponseEntity.ok().body(id);

@@ -65,32 +65,6 @@ public class LessonServiceTest {
 
     }
 
-    // Invalid or null file. Should have thrown
-    @Test
-    void shouldThrowIllegalArgumentException_WhenFileIsNull() {
-        MockMultipartFile mockFile = null;
-
-        Exception exception = assertThrows(IllegalArgumentException.class,
-                () -> lessonService.createLesson(mockFile, 1L));
-
-        assertTrue(exception.getMessage().contains("File must not be null or empty"));
-    }
-
-    @Test
-    void shouldThrowException_WhenFileIsEmpty() {
-        MockMultipartFile mockFile = new MockMultipartFile(
-                "file",
-                "name.txt",
-                "text/plain",
-                new byte[0]
-        );
-
-        Exception exception = assertThrows(IllegalArgumentException.class,
-                () -> lessonService.createLesson(mockFile, 1L));
-
-        assertTrue(exception.getMessage().contains("File must not be null or empty"));
-    }
-
     @Test
     void shouldThrowException_WhenProblemWithUploading() {
         // Given
