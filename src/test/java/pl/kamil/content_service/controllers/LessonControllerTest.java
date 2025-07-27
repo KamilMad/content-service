@@ -48,4 +48,39 @@ public class LessonControllerTest {
 
         verify(lessonService).createLesson(file, userId);
     }
+
+    @Test
+    void shouldReturnBadRequest_WhenFileIsMissing() throws Exception {
+        long userId = 1L;
+        mockMvc.perform(multipart("/lessons")
+                .header("X-User-Id", userId))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnBadRequest_WhenFileIsEmpty() throws Exception {
+
+        long userId = 1L;
+        MockMultipartFile file = new MockMultipartFile("file",
+                "lesson.txt",
+                "text/plain",
+                new byte[0]);
+
+        mockMvc.perform(multipart("/lessons")
+                        .file(file)
+                        .header("X-User-Id", userId))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnBadRequest_WhenUserIdHeaderIsMissing() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "lesson.txt", "text/plain", "Sample content".getBytes()
+        );
+        mockMvc.perform(multipart("/lessons")
+                .file(file))
+                .andExpect(status().isBadRequest());
+    }
+
+
 }
