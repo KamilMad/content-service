@@ -11,6 +11,7 @@ import pl.kamil.content_service.exceptions.AccessDeniedException;
 import pl.kamil.content_service.exceptions.LessonNotFoundException;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
+import pl.kamil.content_service.util.FileValidator;
 import pl.kamil.content_service.util.TextAnalyzer;
 import java.time.Instant;
 import java.util.List;
@@ -22,9 +23,11 @@ public class LessonService {
 
     private final LessonRepository lessonRepository;
     private final LessonFileService lessonFileService;
+    private final FileValidator fileValidator;
 
 
     public Long createLesson(MultipartFile file, long userId) {
+        fileValidator.validate(file);
         //call FileUploadServiceApi to upload file to S3
         FileUploadResponse response = lessonFileService.uploadFile(file);
 

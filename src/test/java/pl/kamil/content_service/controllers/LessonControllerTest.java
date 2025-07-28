@@ -9,14 +9,14 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.multipart.MultipartFile;
+import pl.kamil.content_service.exceptions.FileProcessingException;
 import pl.kamil.content_service.services.LessonService;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
 @AutoConfigureMockMvc(addFilters = false)
@@ -80,6 +80,26 @@ public class LessonControllerTest {
         mockMvc.perform(multipart("/lessons")
                 .file(file))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldThrowFileProcessingException_WhenContentTypeIsUnsupported() throws Exception {
+        long userId = 1L;
+
+        MockMultipartFile mockMultipartFile = new MockMultipartFile("file",
+                "lesson.txt",
+                MediaType.APPLICATION_JSON_VALUE,
+                "Sample content".getBytes()
+                );
+
+        when(lessonService.createLesson(mockMultipartFile, userId))
+                .thenThrow(new FileProcessingException("Unsupported file type: " + mockMultipartFile.getContentType()));
+
+        mockMvc.perform(multipart("/lessons")
+                .file(mockMultipartFile)
+                        .header("X-User-Id", userId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Unsupported file type: " + mockMultipartFile.getContentType()));
     }
 
 
