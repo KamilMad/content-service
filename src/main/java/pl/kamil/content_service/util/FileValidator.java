@@ -16,7 +16,7 @@ public class FileValidator {
         }
 
         if(file.getSize() > MAX_FILE_SIZE) {
-            throw new FileProcessingException("File exceeds the maximum size :" + MAX_FILE_SIZE);
+            throw new FileProcessingException("File exceeds the maximum size 1MB");
         }
     }
 }
