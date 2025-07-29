@@ -9,9 +9,12 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.multipart.MultipartFile;
+import pl.kamil.content_service.common.ErrorMessages;
 import pl.kamil.content_service.dtos.LessonResponse;
 import pl.kamil.content_service.dtos.LessonsResponse;
+import pl.kamil.content_service.exceptions.AccessDeniedException;
 import pl.kamil.content_service.exceptions.FileProcessingException;
+import pl.kamil.content_service.exceptions.LessonNotFoundException;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.services.LessonService;
 
@@ -19,6 +22,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -190,6 +194,63 @@ public class LessonControllerTest {
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.message").value("Something went wrong"));
 
+    }
+
+    @Test
+    void getLessonById_shouldReturnLessonResponse_whenLessonExistsAndUserIsOwner() throws Exception {
+        long lessonId = 1L;
+        long userId = 2L;
+        Lesson lesson = new Lesson(lessonId, "title", 100, Instant.now(), Instant.now(), userId, "s3key");
+        LessonResponse lessonResponse = LessonResponse.from(lesson);
+
+        when(lessonService.getById(lessonId, userId)).thenReturn(lessonResponse);
+
+        mockMvc.perform(get("/lessons/{lessonId}", lessonId)
+                .header("X-User-Id", userId))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void getLessonById_shouldThrowLessonNotFoundException_whenLessonDoesNotExist() throws Exception {
+
+        long lessonId = 1L;
+        long userId = 2L;
+
+        when(lessonService.getById(lessonId, userId)).thenThrow(new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
+
+        mockMvc.perform(get("/lessons/{lessonId}", lessonId)
+                        .header("X-User-Id", userId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(ErrorMessages.LESSON_NOT_FOUND));
+
+        verify(lessonService).getById(lessonId, userId);
 
     }
+
+    @Test
+     void getLessonById_shouldThrowAccessDeniedException_whenUserIsNotLessonOwner() throws Exception {
+         long lessonId = 1L;
+         long userId = 2L;
+
+         when(lessonService.getById(lessonId, userId)).thenThrow(new AccessDeniedException(ErrorMessages.ACCESS_DENIED));
+
+         mockMvc.perform(get("/lessons/{lessonId}", lessonId)
+                         .header("X-User-Id", userId))
+                 .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value(ErrorMessages.ACCESS_DENIED));
+
+        verify(lessonService).getById(lessonId, userId);
+
+    }
+
+    @Test
+     void getLessonById_ShouldReturnBadRequest_WhenUserIdHeaderIsMissing() throws Exception {
+        long lessonId = 1L;
+        mockMvc.perform(get("/lessons/{userId}", lessonId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("Required request header 'X-User-Id' for method parameter type Long is not present"));
+    }
+
+
 }
