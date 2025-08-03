@@ -57,7 +57,9 @@ public class LessonFileService {
 
     public void deleteFile(String key) {
         try {
-            restTemplate.delete(FILE_UPLOAD_URL + "/" + key);
+            restClient.delete()
+                    .uri(FILE_UPLOAD_URL + "/" + key)
+                    .retrieve();
         } catch (RestClientException e) {
             throw new FileStorageException(String.format(ErrorMessages.FILE_DELETE_FAILED, key), e);
         }
