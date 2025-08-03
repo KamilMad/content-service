@@ -8,7 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.test.web.servlet.ResultActions;
 import pl.kamil.content_service.common.ErrorMessages;
 import pl.kamil.content_service.dtos.LessonResponse;
 import pl.kamil.content_service.dtos.LessonsResponse;
@@ -22,12 +22,8 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -253,4 +249,97 @@ public class LessonControllerTest {
     }
 
 
+    private ResultActions performDeleteLesson(long lessonId, long userId) throws Exception {
+        return mockMvc.perform(delete("/lessons/{lessonId}", lessonId)
+                .header("X-User-Id", userId));
+    }
+
+    @Test
+    void shouldDeleteLesson_WhenLessonExistsAndUserIsOwner() throws Exception {
+        long lessonId = 1L;
+        long userId = 2L;
+
+        performDeleteLesson(lessonId, userId)
+                .andExpect(status().isNoContent());
+
+        verify(lessonService).deleteById(lessonId, userId);
+    }
+
+    @Test
+    void deleteLesson_shouldReturnNotFound_whenLessonDoesNotExist() throws Exception {
+        long lessonId = 1L;
+        long userId = 2L;
+
+        doThrow(new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND))
+                .when(lessonService).deleteById(lessonId, userId);
+
+        performDeleteLesson(lessonId, userId)
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(ErrorMessages.LESSON_NOT_FOUND));
+    }
+
+    @Test
+    void deleteLesson_shouldReturnUnauthorized_whenUserIsNotOwner() throws Exception {
+        long lessonId = 1L;
+        long userId = 2L;
+
+        doThrow(new AccessDeniedException(ErrorMessages.ACCESS_DENIED))
+                .when(lessonService).deleteById(lessonId, userId);
+
+        performDeleteLesson(lessonId, userId)
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value(ErrorMessages.ACCESS_DENIED));
+    }
+
+    private ResultActions performGetLessonContent(long lessonId, long userId) throws Exception {
+        return mockMvc.perform(get("/lessons/{id}/content", lessonId)
+                .header("X-User-Id", userId));
+    }
+
+    @Test
+    void getContent_shouldReturnLessonContent_whenUserOwnsLesson() throws Exception {
+        // given
+        long lessonId = 1L;
+        long userId = 42L;
+        String expectedContent = "Lesson file content here.";
+
+        when(lessonService.getLessonContent(lessonId, userId)).thenReturn(expectedContent);
+
+        // when & then
+        performGetLessonContent(lessonId, userId)
+                .andExpect(status().isOk())
+                .andExpect(content().string(expectedContent));
+    }
+
+    @Test
+    void getContent_shouldReturn404_whenLessonDoesNotExist() throws Exception {
+        long lessonId = 1L;
+        long userId = 42L;
+
+        when(lessonService.getLessonContent(lessonId, userId))
+                .thenThrow(new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
+
+        performGetLessonContent(lessonId, userId)
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(ErrorMessages.LESSON_NOT_FOUND));
+    }
+
+    @Test
+    void getContent_shouldReturn403_whenUserDoesNotOwnLesson() throws Exception {
+        long lessonId = 1L;
+        long userId = 42L;
+
+        when(lessonService.getLessonContent(lessonId, userId))
+                .thenThrow(new AccessDeniedException(ErrorMessages.ACCESS_DENIED));
+
+        performGetLessonContent(lessonId, userId)
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value(ErrorMessages.ACCESS_DENIED));
+    }
+
+    @Test
+    void getContent_shouldReturn400_whenUserIdHeaderMissing() throws Exception {
+        mockMvc.perform(get("/lessons/{id}/content", 1L))
+                .andExpect(status().isBadRequest());
+    }
 }

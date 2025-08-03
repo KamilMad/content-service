@@ -2,7 +2,6 @@ package pl.kamil.content_service.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -98,17 +97,23 @@ public class LessonFileService {
     }
 
     private HttpEntity<MultiValueMap<String, Object>> createMultipartRequest(MultipartFile file) {
+
+        // Prepare the body
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+        // Prepare headers
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         try {
             HttpHeaders filePartHeaders = new HttpHeaders();
+
             filePartHeaders.setContentDisposition(ContentDisposition
                     .builder("form-data")
                     .name("file")
                     .filename(file.getOriginalFilename())
                     .build());
+
             filePartHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 
             HttpEntity<byte[]> filePart = new HttpEntity<>(file.getBytes(), filePartHeaders);
