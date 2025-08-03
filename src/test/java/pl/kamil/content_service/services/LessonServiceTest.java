@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.common.ErrorMessages;
 import pl.kamil.content_service.dtos.FileUploadResponse;
 import pl.kamil.content_service.dtos.LessonResponse;
@@ -17,6 +17,8 @@ import pl.kamil.content_service.exceptions.FileProcessingException;
 import pl.kamil.content_service.exceptions.LessonNotFoundException;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
+import pl.kamil.content_service.util.FileValidator;
+
 
 import java.util.Collections;
 import java.util.List;
@@ -31,8 +33,12 @@ public class LessonServiceTest {
 
     @Mock
     private LessonRepository lessonRepository;
+
     @Mock
     private LessonFileService lessonFileService;
+
+    @Mock
+    private FileValidator fileValidator;
 
     @InjectMocks
     private LessonService lessonService;
@@ -40,7 +46,7 @@ public class LessonServiceTest {
     @Test
     void shouldUploadLessonAndReturnId() {
         // Given
-        MockMultipartFile mockFile = new MockMultipartFile(
+        MultipartFile mockFile = new MockMultipartFile(
                 "file",
                 "test.txt",
                 "text/plain",
@@ -53,8 +59,9 @@ public class LessonServiceTest {
         mockLesson.setId(42L);
 
         // When
-        Mockito.when(lessonFileService.uploadFile(mockFile)).thenReturn(response);
-        Mockito.when(lessonRepository.save(any(Lesson.class))).thenReturn(mockLesson);
+
+        when(lessonFileService.uploadFile(mockFile)).thenReturn(response);
+        when(lessonRepository.save(any(Lesson.class))).thenReturn(mockLesson);
 
         // Then
         Long lessonId = lessonService.createLesson(mockFile, userId);
@@ -75,7 +82,7 @@ public class LessonServiceTest {
                 "Hello, World!".getBytes()
         );
         long userId = 1L;
-        when(lessonFileService.uploadFile(any(MockMultipartFile.class)))
+        when(lessonFileService.uploadFile(mockFile))
                 .thenThrow(new RestClientException("Invalid response from file storage service"));
 
         // When

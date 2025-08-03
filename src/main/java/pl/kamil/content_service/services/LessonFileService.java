@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,26 +28,31 @@ import java.util.stream.Collectors;
 public class LessonFileService {
 
     private final RestTemplate restTemplate;
+    private final RestClient restClient;
 
     @Value("${file.upload.url}")
     private String FILE_UPLOAD_URL;
 
     public FileUploadResponse uploadFile(MultipartFile file) {
+        MultipartBodyBuilder multipartBodyBuilder = createMultipartBodybuilder(file);
         String url = buildUploadUrl();
-        HttpEntity<MultiValueMap<String, Object>> request = createMultipartRequest(file);
-     try {
-         ResponseEntity<FileUploadResponse> response = restTemplate.postForEntity(url, request, FileUploadResponse.class);
 
-         if (response.getBody() == null || !response.getStatusCode().is2xxSuccessful()) {
-             throw new FileStorageException(ErrorMessages.FILE_STORAGE_RESPONSE_INVALID);
-         }
+        try {
+            ResponseEntity<FileUploadResponse> response = restClient.post()
+                    .uri(url)
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .body(multipartBodyBuilder.build())
+                    .retrieve()
+                    .toEntity(FileUploadResponse.class);
 
-         return response.getBody();
+            if (response.getBody() == null || !response.getStatusCode().is2xxSuccessful()) {
+                throw new FileStorageException(ErrorMessages.FILE_STORAGE_RESPONSE_INVALID);
+            }
+            return response.getBody();
 
-     } catch (RestClientException e) {
-        throw new FileStorageException(ErrorMessages.FILE_UPLOAD_FAILED, e);
-     }
-
+        }catch (RestClientException e) {
+            throw new FileStorageException(ErrorMessages.FILE_DECODE_FAILED);
+        }
     }
 
     public void deleteFile(String key) {
@@ -96,34 +101,29 @@ public class LessonFileService {
         return factory.builder().build().toString();
     }
 
-    private HttpEntity<MultiValueMap<String, Object>> createMultipartRequest(MultipartFile file) {
+    private MultipartBodyBuilder createMultipartBodybuilder(MultipartFile file) {
+        MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
+        multipartBodyBuilder.part("file", createFilePart(file))
+                .headers(headers -> headers.addAll(createFilePart(file).getHeaders()));
 
-        // Prepare the body
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-
-        // Prepare headers
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-        try {
-            HttpHeaders filePartHeaders = new HttpHeaders();
-
-            filePartHeaders.setContentDisposition(ContentDisposition
-                    .builder("form-data")
-                    .name("file")
-                    .filename(file.getOriginalFilename())
-                    .build());
-
-            filePartHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-
-            HttpEntity<byte[]> filePart = new HttpEntity<>(file.getBytes(), filePartHeaders);
-            body.add("file", filePart);
-        } catch (IOException e) {
-            throw new FileProcessingException("Failed to read file content", e);
-        }
-
-        return new HttpEntity<>(body, headers);
+        return multipartBodyBuilder;
     }
 
+    private HttpEntity<byte[]> createFilePart(MultipartFile file) {
+        HttpHeaders fileHeaders = new HttpHeaders();
+        fileHeaders.setContentDisposition(ContentDisposition
+                .builder("form-data")
+                .name("file")
+                .filename(file.getOriginalFilename())
+                .build());
+
+        fileHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        try {
+            return new HttpEntity<>(file.getBytes(), fileHeaders);
+        }catch (IOException e) {
+            throw new FileProcessingException("Failed to read file content", e);
+        }
+    }
 }
 
