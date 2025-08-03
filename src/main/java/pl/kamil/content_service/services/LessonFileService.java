@@ -73,12 +73,10 @@ public class LessonFileService {
     private Resource fetchFileResource(String fileKey) {
         String url = FILE_UPLOAD_URL + "/" + fileKey;
 
-        ResponseEntity<Resource> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                Resource.class
-        );
+        ResponseEntity<Resource> response =  restClient.get()
+                .uri(url)
+                .retrieve()
+                .toEntity(Resource.class);
 
         if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
             throw new FileStorageException(ErrorMessages.FILE_STORAGE_RESPONSE_INVALID);
