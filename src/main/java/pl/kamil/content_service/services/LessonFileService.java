@@ -24,14 +24,18 @@ import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class LessonFileService {
 
-    private final RestTemplate restTemplate;
     private final RestClient restClient;
+
+
 
     @Value("${file.upload.url}")
     private String FILE_UPLOAD_URL;
+
+    public LessonFileService(RestClient.Builder builder) {
+        this.restClient = builder.build();
+    }
 
     public FileUploadResponse uploadFile(MultipartFile file) {
         MultipartBodyBuilder multipartBodyBuilder = createMultipartBodybuilder(file);
@@ -103,8 +107,14 @@ public class LessonFileService {
 
     private MultipartBodyBuilder createMultipartBodybuilder(MultipartFile file) {
         MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
-        multipartBodyBuilder.part("file", createFilePart(file))
-                .headers(headers -> headers.addAll(createFilePart(file).getHeaders()));
+        HttpEntity<byte[]> filePart = createFilePart(file);
+
+        if (filePart.getBody() == null) {
+            throw new IllegalStateException("File part body must not be null");
+        }
+
+        multipartBodyBuilder.part("file", filePart.getBody())
+                .headers(headers -> headers.addAll(filePart.getHeaders()));
 
         return multipartBodyBuilder;
     }
