@@ -42,17 +42,17 @@ public class LessonFileService {
         String url = buildUploadUrl();
 
         try {
-            ResponseEntity<FileUploadResponse> response = restClient.post()
+            return restClient.post()
                     .uri(url)
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .body(multipartBodyBuilder.build())
-                    .retrieve()
-                    .toEntity(FileUploadResponse.class);
-
-            if (response.getBody() == null || !response.getStatusCode().is2xxSuccessful()) {
-                throw new FileStorageException(ErrorMessages.FILE_STORAGE_RESPONSE_INVALID);
-            }
-            return response.getBody();
+                    .exchange((clientRequest, clientResponse) -> {
+                        if (!clientResponse.getStatusCode().is2xxSuccessful() ||
+                                clientResponse.bodyTo(FileUploadResponse.class) == null) {
+                            throw new FileStorageException(ErrorMessages.FILE_STORAGE_RESPONSE_INVALID);
+                        }
+                        return clientResponse.bodyTo(FileUploadResponse.class);
+                    });
 
         }catch (RestClientException e) {
             throw new FileStorageException(ErrorMessages.FILE_DECODE_FAILED);

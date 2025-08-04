@@ -13,10 +13,12 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.web.multipart.MultipartFile;
+import pl.kamil.content_service.common.ErrorMessages;
 import pl.kamil.content_service.dtos.FileUploadResponse;
+import pl.kamil.content_service.exceptions.ApiError;
+import pl.kamil.content_service.exceptions.FileStorageException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
@@ -59,7 +61,36 @@ public class LessonFileServiceTest {
         assertNotNull(result);
         assertEquals(successfulResponse.s3Key(), result.s3Key());
         server.verify();
+    }
 
+    @Test
+    void uploadFile_ShouldReturnBadGateway_WhenStatusCodeIsNot2xx() throws JsonProcessingException {
+        ApiError error = new ApiError(
+                HttpStatus.BAD_GATEWAY.value(),
+                ErrorMessages.FILE_STORAGE_RESPONSE_INVALID,
+                uploadUrl
+        );
 
+        String errorJson = objectMapper.writeValueAsString(error);
+
+        server.expect(requestTo(uploadUrl))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.BAD_GATEWAY)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(errorJson));
+
+        FileStorageException exception = assertThrows(FileStorageException.class, () -> lessonFileService.uploadFile(mockFile));
+        assertEquals(ErrorMessages.FILE_STORAGE_RESPONSE_INVALID, exception.getMessage());
+    }
+
+    @Test
+    void uploadFile_ShouldReturnBadGateway_WhenResponseBodyIsNull() throws JsonProcessingException {
+        server.expect(requestTo(uploadUrl))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.BAD_GATEWAY)
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        FileStorageException exception = assertThrows(FileStorageException.class, () -> lessonFileService.uploadFile(mockFile));
+        assertEquals(ErrorMessages.FILE_STORAGE_RESPONSE_INVALID, exception.getMessage());
     }
 }
