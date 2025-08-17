@@ -21,14 +21,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 public class LessonFileService {
 
     private final RestClient restClient;
-
-
 
     @Value("${file.upload.url}")
     private String FILE_UPLOAD_URL;
@@ -46,14 +45,11 @@ public class LessonFileService {
                     .uri(url)
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .body(multipartBodyBuilder.build())
-                    .exchange((clientRequest, clientResponse) -> {
-                        if (!clientResponse.getStatusCode().is2xxSuccessful() ||
-                                clientResponse.bodyTo(FileUploadResponse.class) == null) {
-                            throw new FileStorageException(ErrorMessages.FILE_STORAGE_RESPONSE_INVALID);
-                        }
-                        return clientResponse.bodyTo(FileUploadResponse.class);
-                    });
-
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (request, response) -> {
+                        throw new FileStorageException("Upload failed with status: " + response.getStatusCode());
+                    })
+                    .body(FileUploadResponse.class);
         }catch (RestClientException e) {
             throw new FileStorageException(ErrorMessages.FILE_DECODE_FAILED);
         }
@@ -107,15 +103,11 @@ public class LessonFileService {
 
     private MultipartBodyBuilder createMultipartBodybuilder(MultipartFile file) {
         MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
-        HttpEntity<byte[]> filePart = createFilePart(file);
-
-        if (filePart.getBody() == null) {
-            throw new IllegalStateException("File part body must not be null");
-        }
-
-        multipartBodyBuilder.part("file", filePart.getBody())
-                .headers(headers -> headers.addAll(filePart.getHeaders()));
-
+        multipartBodyBuilder.part("file", file.getResource())  // ✅ Pass as Resource, not bytes
+                .filename(file.getOriginalFilename())
+                .contentType(file.getContentType() != null
+                        ? MediaType.parseMediaType(file.getContentType())
+                        : MediaType.APPLICATION_OCTET_STREAM);
         return multipartBodyBuilder;
     }
 
