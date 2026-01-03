@@ -7,11 +7,13 @@ import java.lang.annotation.*;
 
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = NotEmptyMultipartFileValidator.class)
+@Constraint(validatedBy = MaxFileSizeValidator.class)
 @Documented
-public @interface NotEmptyFile {
+public @interface MaxFileSize {
 
-    String message() default "File must not be empty";
+    long value(); //max size in bytes
+
+    String message() default "File size exceeds the maximum allowed size";
 
     Class<?>[] groups() default {};
 

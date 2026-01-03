@@ -37,6 +37,7 @@ public class LessonFileService {
     }
 
     public FileUploadResponse uploadFile(MultipartFile file) {
+
         MultipartBodyBuilder multipartBodyBuilder = createMultipartBodybuilder(file);
         String url = buildUploadUrl();
 
@@ -103,11 +104,14 @@ public class LessonFileService {
 
     private MultipartBodyBuilder createMultipartBodybuilder(MultipartFile file) {
         MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
-        multipartBodyBuilder.part("file", file.getResource())  // ✅ Pass as Resource, not bytes
+
+        multipartBodyBuilder
+                .part("file", file.getResource())  // Pass as Resource, not bytes
                 .filename(file.getOriginalFilename())
                 .contentType(file.getContentType() != null
                         ? MediaType.parseMediaType(file.getContentType())
                         : MediaType.APPLICATION_OCTET_STREAM);
+
         return multipartBodyBuilder;
     }
 
