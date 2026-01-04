@@ -18,7 +18,7 @@ import java.util.UUID;
 public class Content {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     private String s3Key; // path to file in s3
     @CreationTimestamp
