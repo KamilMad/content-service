@@ -11,6 +11,7 @@ import pl.kamil.content_service.dtos.LessonsResponse;
 import pl.kamil.content_service.services.LessonService;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @CrossOrigin(origins = "http://127.0.0.1:5500")  // Allow frontend access
 @RestController
@@ -21,18 +22,18 @@ public class LessonController {
     private final LessonService lessonService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Long> createLesson(
-            @RequestHeader("X-User-Id") Long userId,
+    public ResponseEntity<UUID> createLesson(
+            @RequestHeader("X-User-Id") UUID userId,
             @Valid @ModelAttribute FileUploadRequest request) throws IOException {
 
-        Long id = lessonService.createLesson(request.file(), userId);
+        UUID id = lessonService.createLesson(request.file(), userId);
 
         return ResponseEntity.ok().body(id);
     }
 
     @GetMapping
     public ResponseEntity<LessonsResponse> getLessons(
-            @RequestHeader("X-User-Id") Long userId) {
+            @RequestHeader("X-User-Id") UUID userId) {
 
         LessonsResponse response = lessonService.getAll(userId);
 
@@ -41,8 +42,8 @@ public class LessonController {
 
     @GetMapping("/{lessonId}")
     public ResponseEntity<LessonResponse> getLessonById(
-            @PathVariable Long lessonId,
-            @RequestHeader("X-User-Id") Long userId) {
+            @PathVariable UUID lessonId,
+            @RequestHeader("X-User-Id") UUID userId) {
         LessonResponse response = lessonService.getById(lessonId, userId);
 
         return ResponseEntity.ok().body(response);
@@ -50,8 +51,8 @@ public class LessonController {
 
     @DeleteMapping("/{lessonId}")
     public ResponseEntity<Void> deleteLesson(
-            @PathVariable Long lessonId,
-            @RequestHeader("X-User-Id") Long userId) {
+            @PathVariable UUID lessonId,
+            @RequestHeader("X-User-Id") UUID userId) {
 
         lessonService.deleteById(lessonId, userId);
 
@@ -60,8 +61,8 @@ public class LessonController {
 
     @GetMapping("/{id}/content")
     public ResponseEntity<String> getContent(
-            @PathVariable Long id,
-            @RequestHeader("X-User-Id") Long userId) {
+            @PathVariable UUID id,
+            @RequestHeader("X-User-Id") UUID userId) {
 
         String content = lessonService.getLessonContent(id, userId);
 

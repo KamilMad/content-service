@@ -18,7 +18,7 @@ public class Lesson {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID id;
-    private Long createdBy;
+    private UUID createdBy;
 
     private String title;
     private long total_words;
@@ -35,7 +35,7 @@ public class Lesson {
 
 
 
-    public static Lesson create(String title, Long userId, long total_words) {
+    public static Lesson create(String title, UUID userId, long total_words) {
         Lesson lesson = new Lesson();
         lesson.setTitle(title);
         lesson.setTotal_words(total_words);

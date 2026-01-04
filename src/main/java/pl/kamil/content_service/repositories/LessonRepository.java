@@ -5,9 +5,10 @@ import org.springframework.stereotype.Repository;
 import pl.kamil.content_service.models.Lesson;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface LessonRepository extends JpaRepository<Lesson, Long> {
+public interface LessonRepository extends JpaRepository<Lesson, UUID> {
 
-    List<Lesson> findAllByCreatedBy(Long userId);
+    List<Lesson> findAllByCreatedBy(UUID userId);
 }

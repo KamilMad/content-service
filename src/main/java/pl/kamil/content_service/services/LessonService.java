@@ -14,6 +14,7 @@ import pl.kamil.content_service.repositories.LessonRepository;
 import pl.kamil.content_service.util.TextAnalyzer;
 
 import java.util.List;
+import java.util.UUID;
 
 
 @Service
@@ -23,7 +24,7 @@ public class LessonService {
     private final LessonRepository lessonRepository;
     private final FileStorage fileStorageClient;
 
-    public Long createLesson(MultipartFile file, long userId) {
+    public UUID createLesson(MultipartFile file, UUID userId) {
         FileUploadResponse response = fileStorageClient.storeFile(file);
 
         Lesson lesson = createLessonFromFile(file, userId);
@@ -33,7 +34,7 @@ public class LessonService {
         return savedLesson.getId();
     }
 
-    public LessonResponse getById(Long lessonId, Long userId) {
+    public LessonResponse getById(UUID lessonId, UUID userId) {
 
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
@@ -43,7 +44,7 @@ public class LessonService {
         return LessonResponse.from(lesson);
     }
 
-    public LessonsResponse getAll(Long userId) {
+    public LessonsResponse getAll(UUID userId) {
         List<Lesson> lessons = lessonRepository.findAllByCreatedBy(userId);
         List<LessonResponse> lessonResponses = lessons.stream()
                 .map(LessonResponse::from)
@@ -52,7 +53,7 @@ public class LessonService {
         return LessonsResponse.from(lessonResponses);
     }
 
-    public void deleteById(Long lessonId, Long userId) {
+    public void deleteById(UUID lessonId, UUID userId) {
 
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
@@ -64,7 +65,7 @@ public class LessonService {
         lessonRepository.deleteById(lessonId);
     }
 
-    public String getLessonContent(Long lessonId, Long userId) {
+    public String getLessonContent(UUID lessonId, UUID userId) {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
 
@@ -79,12 +80,12 @@ public class LessonService {
         lesson.setS3Key(key);
     }
 
-    private Lesson createLessonFromFile(MultipartFile file, Long userId) {
+    private Lesson createLessonFromFile(MultipartFile file, UUID userId) {
         long totalWords = TextAnalyzer.countWordsInFile(file);
         return Lesson.create(file.getOriginalFilename(), userId, totalWords);
     }
 
-    private void validateOwnership(Lesson lesson, Long userId) {
+    private void validateOwnership(Lesson lesson, UUID userId) {
         if (!lesson.getCreatedBy().equals(userId)) {
             throw new AccessDeniedException(ErrorMessages.ACCESS_DENIED);
         }
