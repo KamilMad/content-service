@@ -1,13 +1,14 @@
-package pl.kamil.content_service.util;
+package pl.kamil.content_service.validation.annotations;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+import pl.kamil.content_service.validation.validators.NotEmptyFileValidator;
 
 import java.lang.annotation.*;
 
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = NotEmptyMultipartFileValidator.class)
+@Constraint(validatedBy = NotEmptyFileValidator.class)
 @Documented
 public @interface NotEmptyFile {
 

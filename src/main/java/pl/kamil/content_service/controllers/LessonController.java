@@ -1,11 +1,11 @@
 package pl.kamil.content_service.controllers;
 
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import pl.kamil.content_service.dtos.FileUploadRequest;
 import pl.kamil.content_service.dtos.LessonResponse;
 import pl.kamil.content_service.dtos.LessonsResponse;
 import pl.kamil.content_service.services.LessonService;
@@ -22,14 +22,10 @@ public class LessonController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Long> createLesson(
-            @RequestParam("file") MultipartFile file,
-            @RequestHeader("X-User-Id") Long userId) throws IOException {
+            @RequestHeader("X-User-Id") Long userId,
+            @Valid @ModelAttribute FileUploadRequest request) throws IOException {
 
-        if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("File must not be null or empty");
-        }
-
-        Long id = lessonService.createLesson(file, userId);
+        Long id = lessonService.createLesson(request.file(), userId);
 
         return ResponseEntity.ok().body(id);
     }

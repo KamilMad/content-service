@@ -5,9 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Data
@@ -18,15 +19,13 @@ public class Content {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-
-//    @ManyToOne
-//    private List<Lesson> lessons;
-
-    private String file_url;
-
-    private String content_type;
+    private UUID id;
+    private String s3Key; // path to file in s3
+    @CreationTimestamp
     private Instant created_at;
-    private Instant updated_at;
+
+    @OneToOne
+    @JoinColumn(name = "lesson_id")
+    private Lesson lesson;
 
 }

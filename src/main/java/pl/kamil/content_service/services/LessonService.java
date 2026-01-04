@@ -1,6 +1,5 @@
 package pl.kamil.content_service.services;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,9 +11,8 @@ import pl.kamil.content_service.exceptions.AccessDeniedException;
 import pl.kamil.content_service.exceptions.LessonNotFoundException;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
-import pl.kamil.content_service.util.FileValidator;
 import pl.kamil.content_service.util.TextAnalyzer;
-import java.time.Instant;
+
 import java.util.List;
 
 
@@ -23,14 +21,10 @@ import java.util.List;
 public class LessonService {
 
     private final LessonRepository lessonRepository;
-    private final LessonFileService lessonFileService;
-    private final FileValidator fileValidator;
-
+    private final FileStorage fileStorageClient;
 
     public Long createLesson(MultipartFile file, long userId) {
-        fileValidator.validate(file);
-        //call FileUploadServiceApi to upload file to S3
-        FileUploadResponse response = lessonFileService.uploadFile(file);
+        FileUploadResponse response = fileStorageClient.storeFile(file);
 
         Lesson lesson = createLessonFromFile(file, userId);
         updateLessonWithS3Key(lesson, response.s3Key());
@@ -66,7 +60,7 @@ public class LessonService {
         validateOwnership(lesson, userId);
 
         String fileKey = lesson.getS3Key();
-        lessonFileService.deleteFile(fileKey);
+        fileStorageClient.deleteFile(fileKey);
         lessonRepository.deleteById(lessonId);
     }
 
@@ -78,12 +72,11 @@ public class LessonService {
 
         String fileKey = lesson.getS3Key();
 
-        return lessonFileService.getFileContent(fileKey);
+        return fileStorageClient.getFileContent(fileKey);
     }
 
     private void updateLessonWithS3Key(Lesson lesson, String key) {
         lesson.setS3Key(key);
-        lesson.setUpdated_at(Instant.now());
     }
 
     private Lesson createLessonFromFile(MultipartFile file, Long userId) {

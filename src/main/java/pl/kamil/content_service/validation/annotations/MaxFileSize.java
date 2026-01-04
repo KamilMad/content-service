@@ -1,7 +1,8 @@
-package pl.kamil.content_service.util;
+package pl.kamil.content_service.validation.annotations;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+import pl.kamil.content_service.validation.validators.MaxFileSizeValidator;
 
 import java.lang.annotation.*;
 

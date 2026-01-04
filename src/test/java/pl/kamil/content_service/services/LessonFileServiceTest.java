@@ -22,11 +22,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
-@RestClientTest(LessonFileService.class)
+@RestClientTest(FileStorageClient.class)
 public class LessonFileServiceTest {
 
     @Autowired
-    private LessonFileService lessonFileService;
+    private FileStorageClient lessonFileService;
 
     @Autowired
     private MockRestServiceServer server;
@@ -79,7 +79,7 @@ public class LessonFileServiceTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(errorJson));
 
-        FileStorageException exception = assertThrows(FileStorageException.class, () -> lessonFileService.uploadFile(mockFile));
+        FileStorageException exception = assertThrows(FileStorageException.class, () -> lessonFileService.storeFile(mockFile));
         assertEquals(ErrorMessages.FILE_STORAGE_RESPONSE_INVALID, exception.getMessage());
     }
 
@@ -90,7 +90,7 @@ public class LessonFileServiceTest {
                 .andRespond(withStatus(HttpStatus.BAD_GATEWAY)
                         .contentType(MediaType.APPLICATION_JSON));
 
-        FileStorageException exception = assertThrows(FileStorageException.class, () -> lessonFileService.uploadFile(mockFile));
+        FileStorageException exception = assertThrows(FileStorageException.class, () -> lessonFileService.storeFile(mockFile));
         assertEquals(ErrorMessages.FILE_STORAGE_RESPONSE_INVALID, exception.getMessage());
     }
 }

@@ -1,6 +1,5 @@
 package pl.kamil.content_service.services;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -8,35 +7,32 @@ import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
 import pl.kamil.content_service.common.ErrorMessages;
 import pl.kamil.content_service.dtos.FileUploadResponse;
-import pl.kamil.content_service.exceptions.FileProcessingException;
 import pl.kamil.content_service.exceptions.FileStorageException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-public class LessonFileService {
+public class FileStorageClient implements FileStorage {
 
     private final RestClient restClient;
 
     @Value("${file.upload.url}")
     private String FILE_UPLOAD_URL;
 
-    public LessonFileService(RestClient.Builder builder) {
+    public FileStorageClient(RestClient.Builder builder) {
         this.restClient = builder.build();
     }
 
-    public FileUploadResponse uploadFile(MultipartFile file) {
+    public FileUploadResponse storeFile(MultipartFile file) {
 
         MultipartBodyBuilder multipartBodyBuilder = createMultipartBodybuilder(file);
         String url = buildUploadUrl();
@@ -113,23 +109,6 @@ public class LessonFileService {
                         : MediaType.APPLICATION_OCTET_STREAM);
 
         return multipartBodyBuilder;
-    }
-
-    private HttpEntity<byte[]> createFilePart(MultipartFile file) {
-        HttpHeaders fileHeaders = new HttpHeaders();
-        fileHeaders.setContentDisposition(ContentDisposition
-                .builder("form-data")
-                .name("file")
-                .filename(file.getOriginalFilename())
-                .build());
-
-        fileHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-
-        try {
-            return new HttpEntity<>(file.getBytes(), fileHeaders);
-        }catch (IOException e) {
-            throw new FileProcessingException("Failed to read file content", e);
-        }
     }
 }
 

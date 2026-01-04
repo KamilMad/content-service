@@ -17,7 +17,6 @@ import pl.kamil.content_service.exceptions.FileProcessingException;
 import pl.kamil.content_service.exceptions.LessonNotFoundException;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
-import pl.kamil.content_service.util.FileValidator;
 
 
 import java.util.Collections;
@@ -35,7 +34,7 @@ public class LessonServiceTest {
     private LessonRepository lessonRepository;
 
     @Mock
-    private LessonFileService lessonFileService;
+    private FileStorageClient lessonFileService;
 
     @Mock
     private FileValidator fileValidator;
@@ -60,14 +59,14 @@ public class LessonServiceTest {
 
         // When
 
-        when(lessonFileService.uploadFile(mockFile)).thenReturn(response);
+        when(lessonFileService.storeFile(mockFile)).thenReturn(response);
         when(lessonRepository.save(any(Lesson.class))).thenReturn(mockLesson);
 
         // Then
         Long lessonId = lessonService.createLesson(mockFile, userId);
 
         assertEquals(42L, lessonId);
-        verify(lessonFileService).uploadFile(mockFile);
+        verify(lessonFileService).storeFile(mockFile);
         verify(lessonRepository).save(any(Lesson.class));
 
     }
@@ -82,7 +81,7 @@ public class LessonServiceTest {
                 "Hello, World!".getBytes()
         );
         long userId = 1L;
-        when(lessonFileService.uploadFile(mockFile))
+        when(lessonFileService.storeFile(mockFile))
                 .thenThrow(new RestClientException("Invalid response from file storage service"));
 
         // When
@@ -91,7 +90,7 @@ public class LessonServiceTest {
         // Then
         assertTrue(exception.getMessage().contains("Invalid response from file storage service"));
         verify(lessonRepository, never()).save(any());
-        verify(lessonFileService).uploadFile(mockFile);
+        verify(lessonFileService).storeFile(mockFile);
     }
 
     @Test
@@ -105,7 +104,7 @@ public class LessonServiceTest {
         );
         long userId = 1L;
 
-        when(lessonFileService.uploadFile(mockFile)).thenThrow(new FileProcessingException("Failed to read file content"));
+        when(lessonFileService.storeFile(mockFile)).thenThrow(new FileProcessingException("Failed to read file content"));
 
         // When
 
@@ -114,7 +113,7 @@ public class LessonServiceTest {
         //Then
         assertTrue(exception.getMessage().contains("Failed to read file content"));
         verify(lessonRepository, never()).save(any());
-        verify(lessonFileService).uploadFile(mockFile);
+        verify(lessonFileService).storeFile(mockFile);
     }
 
     @Test
@@ -127,7 +126,7 @@ public class LessonServiceTest {
                 "Hello, World!".getBytes());
         long userId = 1L;
 
-        when(lessonFileService.uploadFile(mockFile)).thenReturn(new FileUploadResponse("s3key"));
+        when(lessonFileService.storeFile(mockFile)).thenReturn(new FileUploadResponse("s3key"));
 
         // Mock the repository save to return something
         Lesson mockSavedLesson = new Lesson();

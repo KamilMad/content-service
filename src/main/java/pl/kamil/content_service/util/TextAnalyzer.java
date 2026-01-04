@@ -1,6 +1,5 @@
 package pl.kamil.content_service.util;
 
-import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.common.ErrorMessages;
 import pl.kamil.content_service.exceptions.FileProcessingException;
