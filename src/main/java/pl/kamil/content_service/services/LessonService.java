@@ -10,10 +10,11 @@ import pl.kamil.content_service.dtos.FileUploadResponse;
 import pl.kamil.content_service.dtos.LessonResponse;
 import pl.kamil.content_service.dtos.LessonsResponse;
 import pl.kamil.content_service.events.LessonDeleteEvent;
-import pl.kamil.content_service.exceptions.AccessDeniedException;
 import pl.kamil.content_service.exceptions.LessonNotFoundException;
+import pl.kamil.content_service.models.Content;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
+import pl.kamil.content_service.util.TextAnalyzer;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,16 +26,15 @@ public class LessonService {
 
     private final LessonRepository lessonRepository;
     private final FileStorage fileStorageClient;
+    private final ContentService contentService;
     private final ApplicationEventPublisher eventPublisher;
 
     public UUID createLesson(MultipartFile file, UUID userId) {
-        FileUploadResponse response = fileStorageClient.storeFile(file);
 
-        Lesson lesson = createLessonFromFile(file, userId);
-        //updateLessonWithS3Key(lesson, response.s3Key());
-        Lesson savedLesson = lessonRepository.save(lesson);
-
-        return savedLesson.getId();
+        FileUploadResponse uploadResponse = uploadFile(file);
+        Content content = createContentEntity(file, uploadResponse);
+        Lesson lesson = createLessonEntity(file, content, userId);
+        return saveLesson(lesson);
     }
 
     public LessonResponse getById(UUID lessonId, UUID userId) {
@@ -79,19 +79,32 @@ public class LessonService {
 
         return fileStorageClient.getFileContent(fileKey);
     }
-
-//    private void updateLessonWithS3Key(Lesson lesson, String key) {
-//        lesson.setS3Key(key);
-//    }
-
-    private Lesson createLessonFromFile(MultipartFile file, UUID userId) {
-        return Lesson.create(file.getOriginalFilename(), userId);
+    private FileUploadResponse uploadFile(MultipartFile file) {
+        return fileStorageClient.storeFile(file);
     }
 
-    private void validateOwnership(Lesson lesson, UUID userId) {
-        if (!lesson.getCreatedBy().equals(userId)) {
-            throw new AccessDeniedException(ErrorMessages.ACCESS_DENIED);
-        }
+    private Lesson createLessonEntity(MultipartFile file, Content content, UUID userId) {
+        Lesson lesson = buildLessonEntity(file.getOriginalFilename(), userId);
+        lesson.setContent(content);
+        return lesson;
     }
 
+    private Lesson buildLessonEntity(String filename, UUID userId) {
+        return Lesson.builder()
+                .title(filename)
+                .createdBy(userId)
+                .build();
+    }
+
+    private Content createContentEntity(MultipartFile file, FileUploadResponse uploadResponse) {
+        String title = file.getOriginalFilename();
+        long totalWords = TextAnalyzer.countWordsInFile(file);
+
+        return contentService.createContent(uploadResponse.s3Key(), totalWords);
+    }
+
+    private UUID saveLesson(Lesson lesson) {
+        Lesson saved = lessonRepository.save(lesson);
+        return saved.getId();
+    }
 }

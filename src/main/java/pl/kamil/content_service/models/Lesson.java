@@ -13,6 +13,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Lesson {
 
     @Id
@@ -32,10 +33,4 @@ public class Lesson {
     @UpdateTimestamp
     private Instant updated_at;
 
-    public static Lesson create(String title, UUID userId) {
-        Lesson lesson = new Lesson();
-        lesson.setTitle(title);
-        lesson.setCreatedBy(userId);
-        return lesson;
-    }
 }
