@@ -21,8 +21,8 @@ public class Lesson {
     private UUID createdBy;
 
     private String title;
-    private long total_words;
-    private String s3Key;
+    //private long total_words;
+    //private String s3Key;
 
     @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL)
     private Content content;
@@ -32,13 +32,9 @@ public class Lesson {
     @UpdateTimestamp
     private Instant updated_at;
 
-
-
-
-    public static Lesson create(String title, UUID userId, long total_words) {
+    public static Lesson create(String title, UUID userId) {
         Lesson lesson = new Lesson();
         lesson.setTitle(title);
-        lesson.setTotal_words(total_words);
         lesson.setCreatedBy(userId);
         return lesson;
     }

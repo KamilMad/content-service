@@ -262,7 +262,7 @@ public class LessonControllerTest {
         performDeleteLesson(lessonId, userId)
                 .andExpect(status().isNoContent());
 
-        verify(lessonService).deleteById(lessonId, userId);
+        verify(lessonService).deleteLesson(lessonId, userId);
     }
 
     @Test
@@ -271,7 +271,7 @@ public class LessonControllerTest {
         long userId = 2L;
 
         doThrow(new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND))
-                .when(lessonService).deleteById(lessonId, userId);
+                .when(lessonService).deleteLesson(lessonId, userId);
 
         performDeleteLesson(lessonId, userId)
                 .andExpect(status().isNotFound())
@@ -284,7 +284,7 @@ public class LessonControllerTest {
         long userId = 2L;
 
         doThrow(new AccessDeniedException(ErrorMessages.ACCESS_DENIED))
-                .when(lessonService).deleteById(lessonId, userId);
+                .when(lessonService).deleteLesson(lessonId, userId);
 
         performDeleteLesson(lessonId, userId)
                 .andExpect(status().isForbidden())

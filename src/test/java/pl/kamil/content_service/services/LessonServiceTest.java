@@ -256,7 +256,7 @@ public class LessonServiceTest {
         lesson.setS3Key("s3Key");
         when(lessonRepository.findById(lessonId)).thenReturn(Optional.of(lesson));
 
-        lessonService.deleteById(lessonId, userId);
+        lessonService.deleteLesson(lessonId, userId);
 
         verify(lessonFileService).deleteFile("s3Key");
         verify(lessonRepository).deleteById(lessonId);
@@ -272,7 +272,7 @@ public class LessonServiceTest {
 
         // When
         Exception ex = assertThrows(LessonNotFoundException.class,
-                () -> lessonService.deleteById(lessonId, userId));
+                () -> lessonService.deleteLesson(lessonId, userId));
 
         // Then
         assertEquals(ErrorMessages.LESSON_NOT_FOUND, ex.getMessage());
@@ -292,7 +292,7 @@ public class LessonServiceTest {
         when(lessonRepository.findById(lessonId)).thenReturn(Optional.of(lesson));
 
         Exception ex = assertThrows(AccessDeniedException.class,
-                () -> lessonService.deleteById(lessonId, wrongUserId));
+                () -> lessonService.deleteLesson(lessonId, wrongUserId));
 
         assertEquals(ErrorMessages.ACCESS_DENIED, ex.getMessage());
         verifyNoInteractions(lessonFileService);

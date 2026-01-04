@@ -54,7 +54,7 @@ public class LessonController {
             @PathVariable UUID lessonId,
             @RequestHeader("X-User-Id") UUID userId) {
 
-        lessonService.deleteById(lessonId, userId);
+        lessonService.deleteLesson(lessonId, userId);
 
         return ResponseEntity.noContent().build();
     }
