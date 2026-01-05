@@ -47,18 +47,18 @@ public class LessonController {
         return ResponseEntity.ok().body(response);
     }
 
-    @GetMapping("/{lessonId}")
+    @GetMapping("/{id}")
     public ResponseEntity<LessonResponse> getLessonById(
-            @PathVariable UUID lessonId,
+            @PathVariable("id") UUID lessonId,
             @RequestHeader("X-User-Id") UUID userId) {
 
         LessonResponse response = lessonService.getLesson(lessonId, userId);
         return ResponseEntity.ok().body(response);
     }
 
-    @DeleteMapping("/{lessonId}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLesson(
-            @PathVariable UUID lessonId,
+            @PathVariable("id") UUID lessonId,
             @RequestHeader("X-User-Id") UUID userId) {
 
         lessonService.deleteLesson(lessonId, userId);
@@ -67,10 +67,10 @@ public class LessonController {
 
     @GetMapping("/{id}/content")
     public ResponseEntity<LessonContentResponse> getContent(
-            @PathVariable UUID id,
+            @PathVariable("id") UUID lessonId,
             @RequestHeader("X-User-Id") UUID userId) {
 
-        LessonContentResponse contentResponse = lessonService.getLessonContent(id, userId);
+        LessonContentResponse contentResponse = lessonService.getLessonContent(lessonId, userId);
         return ResponseEntity.ok().body(contentResponse);
     }
 
