@@ -3,22 +3,21 @@ package pl.kamil.content_service.dtos;
 import pl.kamil.content_service.models.Lesson;
 
 import java.time.Instant;
+import java.util.UUID;
 
 public record LessonResponse(
-        Long id,
+        UUID id,
         String title,
-        long totalWords,
-        Instant created_at,
-        String s3Key
+        Instant createdAt,
+        Instant updatedAt
 ) {
 
     public static LessonResponse from(Lesson lesson) {
         return new LessonResponse(
                 lesson.getId(),
                 lesson.getTitle(),
-                lesson.getTotal_words(),
-                lesson.getCreated_at(),
-                lesson.getS3Key()
+                lesson.getCreatedAt(),
+                lesson.getUpdatedAt()
         );
     }
 }

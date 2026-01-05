@@ -24,7 +24,7 @@ public class Content {
     private long totalWords;
 
     @CreationTimestamp
-    private Instant created_at;
+    private Instant createdAt;
 
     @OneToOne
     @JoinColumn(name = "lesson_id")

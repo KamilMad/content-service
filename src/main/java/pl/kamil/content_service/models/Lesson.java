@@ -22,15 +22,13 @@ public class Lesson {
     private UUID createdBy;
 
     private String title;
-    //private long total_words;
-    //private String s3Key;
 
     @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL)
     private Content content;
 
     @CreationTimestamp
-    private Instant created_at;
+    private Instant createdAt;
     @UpdateTimestamp
-    private Instant updated_at;
+    private Instant updatedAt;
 
 }

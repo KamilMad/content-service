@@ -155,7 +155,7 @@ public class LessonServiceTest {
         when(lessonRepository.findById(lessonId)).thenReturn(Optional.of(lesson));
 
         // When
-        LessonResponse response = lessonService.getById(lessonId, userId);
+        LessonResponse response = lessonService.getLesson(lessonId, userId);
 
         // Then
         assertNotNull(response);
@@ -171,7 +171,7 @@ public class LessonServiceTest {
         when(lessonRepository.findById(lessonId)).thenThrow(new LessonNotFoundException("Lesson not found"));
 
         Exception exception = assertThrows(LessonNotFoundException.class,
-                () -> lessonService.getById(lessonId, userId));
+                () -> lessonService.getLesson(lessonId, userId));
 
         assertTrue(exception.getMessage().contains("Lesson not found"));
     }
@@ -188,7 +188,7 @@ public class LessonServiceTest {
         when(lessonRepository.findById(lessonId)).thenReturn(Optional.of(lesson));
 
         // expect
-        Exception exception = assertThrows(AccessDeniedException.class, () -> lessonService.getById(lessonId, userId));
+        Exception exception = assertThrows(AccessDeniedException.class, () -> lessonService.getLesson(lessonId, userId));
         assertTrue(exception.getMessage().contains("You do not have permission to access this lesson"));
 
     }
@@ -206,7 +206,7 @@ public class LessonServiceTest {
         when(lessonRepository.findAllByCreatedBy(userId)).thenReturn(lessons);
 
         // When
-        LessonsResponse response = lessonService.getAll(userId);
+        LessonsResponse response = lessonService.getAllLessons(userId);
 
         // Then
         assertEquals(response.total(), lessons.size());
@@ -229,7 +229,7 @@ public class LessonServiceTest {
         when(lessonRepository.findAllByCreatedBy(userId)).thenReturn(Collections.emptyList());
 
         // When
-        LessonsResponse response = lessonService.getAll(userId);
+        LessonsResponse response = lessonService.getAllLessons(userId);
 
         // Then
         assertNotNull(response);
@@ -243,7 +243,7 @@ public class LessonServiceTest {
         RuntimeException dbException = new RuntimeException("DB error");
         when(lessonRepository.findAllByCreatedBy(userId)).thenThrow(dbException);
 
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> lessonService.getAll(userId));
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> lessonService.getAllLessons(userId));
         assertEquals("DB error", thrown.getMessage());
     }
 

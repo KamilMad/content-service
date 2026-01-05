@@ -147,7 +147,7 @@ public class LessonControllerTest {
 
         LessonsResponse expectedResponse = new LessonsResponse(lessonList, lessonList.size());
 
-        when(lessonService.getAll(userId)).thenReturn(expectedResponse);
+        when(lessonService.getAllLessons(userId)).thenReturn(expectedResponse);
 
         mockMvc.perform(get("/lessons")
                 .header("X-User-Id", userId))
@@ -172,7 +172,7 @@ public class LessonControllerTest {
         long userId = 1L;
         LessonsResponse response = new LessonsResponse(Collections.emptyList(), 0);
 
-        when(lessonService.getAll(userId)).thenReturn(response);
+        when(lessonService.getAllLessons(userId)).thenReturn(response);
 
         mockMvc.perform(get("/lessons")
                 .header("X-User-Id", userId))
@@ -183,7 +183,7 @@ public class LessonControllerTest {
     @Test
     void getLessons_ShouldReturn500WhenServiceThrowsException() throws Exception {
         long userId = 1L;
-        when(lessonService.getAll(userId)).thenThrow(new RuntimeException("Something went wrong"));
+        when(lessonService.getAllLessons(userId)).thenThrow(new RuntimeException("Something went wrong"));
 
         mockMvc.perform(get("/lessons")
                 .header("X-User-Id", userId))
@@ -199,7 +199,7 @@ public class LessonControllerTest {
         Lesson lesson = new Lesson(lessonId, "title", 100, Instant.now(), Instant.now(), userId, "s3key");
         LessonResponse lessonResponse = LessonResponse.from(lesson);
 
-        when(lessonService.getById(lessonId, userId)).thenReturn(lessonResponse);
+        when(lessonService.getLesson(lessonId, userId)).thenReturn(lessonResponse);
 
         mockMvc.perform(get("/lessons/{lessonId}", lessonId)
                 .header("X-User-Id", userId))
@@ -212,14 +212,14 @@ public class LessonControllerTest {
         long lessonId = 1L;
         long userId = 2L;
 
-        when(lessonService.getById(lessonId, userId)).thenThrow(new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
+        when(lessonService.getLesson(lessonId, userId)).thenThrow(new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
 
         mockMvc.perform(get("/lessons/{lessonId}", lessonId)
                         .header("X-User-Id", userId))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(ErrorMessages.LESSON_NOT_FOUND));
 
-        verify(lessonService).getById(lessonId, userId);
+        verify(lessonService).getLesson(lessonId, userId);
 
     }
 
@@ -228,14 +228,14 @@ public class LessonControllerTest {
          long lessonId = 1L;
          long userId = 2L;
 
-         when(lessonService.getById(lessonId, userId)).thenThrow(new AccessDeniedException(ErrorMessages.ACCESS_DENIED));
+         when(lessonService.getLesson(lessonId, userId)).thenThrow(new AccessDeniedException(ErrorMessages.ACCESS_DENIED));
 
          mockMvc.perform(get("/lessons/{lessonId}", lessonId)
                          .header("X-User-Id", userId))
                  .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(ErrorMessages.ACCESS_DENIED));
 
-        verify(lessonService).getById(lessonId, userId);
+        verify(lessonService).getLesson(lessonId, userId);
 
     }
 

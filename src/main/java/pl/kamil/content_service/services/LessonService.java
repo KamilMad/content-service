@@ -2,14 +2,17 @@ package pl.kamil.content_service.services;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.common.ErrorMessages;
 import pl.kamil.content_service.dtos.FileUploadResponse;
+import pl.kamil.content_service.dtos.LessonContentResponse;
 import pl.kamil.content_service.dtos.LessonResponse;
 import pl.kamil.content_service.dtos.LessonsResponse;
 import pl.kamil.content_service.events.LessonDeleteEvent;
+import pl.kamil.content_service.exceptions.LessonContentNotFoundException;
 import pl.kamil.content_service.exceptions.LessonNotFoundException;
 import pl.kamil.content_service.models.Content;
 import pl.kamil.content_service.models.Lesson;
@@ -20,6 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LessonService {
@@ -29,23 +33,28 @@ public class LessonService {
     private final ContentService contentService;
     private final ApplicationEventPublisher eventPublisher;
 
-    public UUID createLesson(MultipartFile file, UUID userId) {
-
-        FileUploadResponse uploadResponse = uploadFile(file);
-        Content content = createContentEntity(file, uploadResponse);
-        Lesson lesson = createLessonEntity(file, content, userId);
-        return saveLesson(lesson);
+    @Transactional
+    public LessonResponse createLesson(MultipartFile file, UUID userId) {
+        FileUploadResponse uploadResponse = null;
+        try {
+            uploadResponse = uploadFile(file);
+            Content content = createContentEntity(file, uploadResponse);
+            Lesson lesson = createLessonEntity(file, content, userId);
+            return saveLesson(lesson);
+        } catch (Exception e) {
+            if (uploadResponse != null) {
+                cleanupS3(uploadResponse.s3Key());
+            }
+            throw e;
+        }
     }
 
-    public LessonResponse getById(UUID lessonId, UUID userId) {
-
-        Lesson lesson = lessonRepository.findByIdAndCreatedBy(lessonId, userId)
-                .orElseThrow(() -> new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
-
+    public LessonResponse getLesson(UUID lessonId, UUID userId) {
+        Lesson lesson = fetchLesson(lessonId, userId);
         return LessonResponse.from(lesson);
     }
 
-    public LessonsResponse getAll(UUID userId) {
+    public LessonsResponse getAllLessons(UUID userId) {
         List<Lesson> lessons = lessonRepository.findAllByCreatedBy(userId);
         List<LessonResponse> lessonResponses = lessons.stream()
                 .map(LessonResponse::from)
@@ -54,31 +63,24 @@ public class LessonService {
         return LessonsResponse.from(lessonResponses);
     }
 
-// TODO: Make it transactional? What if fileStorageClient fail?
     @Transactional
     public void deleteLesson(UUID lessonId, UUID userId) {
-
-        Lesson lesson = lessonRepository.findByIdAndCreatedBy(lessonId, userId)
-                .orElseThrow(() -> new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
-
+        Lesson lesson = fetchLesson(lessonId, userId);
         String fileKey = lesson.getContent().getS3Key();
-
         lessonRepository.delete(lesson);
 
         eventPublisher.publishEvent(
-                new LessonDeleteEvent(lesson.getId(), lesson.getContent().getS3Key())
+                new LessonDeleteEvent(lesson.getId(), fileKey)
         );
-        fileStorageClient.deleteFile(fileKey);
     }
 
-    public String getLessonContent(UUID lessonId, UUID userId) {
-        Lesson lesson = lessonRepository.findByIdAndCreatedBy(lessonId, userId)
-                .orElseThrow(() -> new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
-
-        //String fileKey = lesson.getS3Key();
-
-        return fileStorageClient.getFileContent(fileKey);
+    public LessonContentResponse getLessonContent(UUID lessonId, UUID userId) {
+        Lesson lesson = fetchLesson(lessonId, userId);
+        Content content = fetchContent(lesson);
+        String fileText =  fetchLessonTextFromS3(content);
+        return new LessonContentResponse(fileText, content.getTotalWords());
     }
+
     private FileUploadResponse uploadFile(MultipartFile file) {
         return fileStorageClient.storeFile(file);
     }
@@ -97,14 +99,38 @@ public class LessonService {
     }
 
     private Content createContentEntity(MultipartFile file, FileUploadResponse uploadResponse) {
-        String title = file.getOriginalFilename();
         long totalWords = TextAnalyzer.countWordsInFile(file);
-
         return contentService.createContent(uploadResponse.s3Key(), totalWords);
     }
 
-    private UUID saveLesson(Lesson lesson) {
+    private LessonResponse saveLesson(Lesson lesson) {
         Lesson saved = lessonRepository.save(lesson);
-        return saved.getId();
+        return LessonResponse.from(saved);
+    }
+
+    private void cleanupS3(String s3Key) {
+        try {
+            fileStorageClient.deleteFile(s3Key);
+        } catch (Exception e) {
+            log.warn("Failed to cleanup S3 for key {}: {}", s3Key, e.getMessage() );
+        }
+    }
+
+    private Lesson fetchLesson(UUID lessonId, UUID userId) {
+        return lessonRepository.findByIdAndCreatedBy(lessonId, userId)
+                .orElseThrow(() -> new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
+    }
+
+    private Content fetchContent(Lesson lesson) {
+        Content content = lesson.getContent();
+        if (content == null) {
+            throw new LessonContentNotFoundException(
+                    "Content not found for lesson with id " + lesson.getId());
+        }
+        return content;
+    }
+
+    private String fetchLessonTextFromS3(Content content) {
+        return fileStorageClient.getFileContent(content.getS3Key());
     }
 }
