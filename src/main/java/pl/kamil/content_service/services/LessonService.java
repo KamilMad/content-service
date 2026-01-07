@@ -124,8 +124,8 @@ public class LessonService {
     private Content fetchContent(Lesson lesson) {
         Content content = lesson.getContent();
         if (content == null) {
-            throw new LessonContentNotFoundException(
-                    "Content not found for lesson with id " + lesson.getId());
+            log.warn("Content not found for lesson with id: {}",lesson.getId());
+            throw new LessonContentNotFoundException(ErrorMessages.LESSON_CONTENT_NOT_FOUND);
         }
         return content;
     }
