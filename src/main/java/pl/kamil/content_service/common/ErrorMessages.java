@@ -1,7 +1,10 @@
 package pl.kamil.content_service.common;
 
 public class ErrorMessages {
+    // Lesson Errors
     public static final String LESSON_NOT_FOUND = "Lesson not found";
+    public static final String LESSON_CONTENT_NOT_FOUND = "Lesson content not found";
+    //
     public static final String ACCESS_DENIED = "You do not have permission to access this lesson";
     public static final String FILE_UPLOAD_FAILED = "Failed to upload file to storage service";
     public static final String FILE_DECODE_FAILED = "Failed to decode uploaded file";
