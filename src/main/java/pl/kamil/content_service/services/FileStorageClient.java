@@ -2,7 +2,9 @@ package pl.kamil.content_service.services;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -44,11 +46,11 @@ public class FileStorageClient implements FileStorage {
                     .body(multipartBodyBuilder.build())
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, (request, response) -> {
-                        throw new FileStorageException("Upload failed with status: " + response.getStatusCode());
+                        throw new FileStorageException(ErrorMessages.FILE_UPLOAD_FAILED);
                     })
                     .body(FileUploadResponse.class);
-        }catch (RestClientException e) {
-            throw new FileStorageException(ErrorMessages.FILE_DECODE_FAILED);
+        } catch (RestClientException e) {
+            throw new FileStorageException(ErrorMessages.FILE_UPLOAD_FAILED);
         }
     }
 
@@ -58,19 +60,19 @@ public class FileStorageClient implements FileStorage {
                     .uri(FILE_UPLOAD_URL + "/" + key)
                     .retrieve();
         } catch (RestClientException e) {
-            throw new FileStorageException(String.format(ErrorMessages.FILE_DELETE_FAILED, key), e);
+            throw new FileStorageException(ErrorMessages.FILE_DELETE_FAILED);
         }
     }
 
     public String getFileContent(String fileKey) {
         Resource fileResource = fetchFileResource(fileKey);
-        return readFileContent(fileResource, fileKey);
+        return readFileContent(fileResource);
     }
 
     private Resource fetchFileResource(String fileKey) {
         String url = FILE_UPLOAD_URL + "/" + fileKey;
 
-        ResponseEntity<Resource> response =  restClient.get()
+        ResponseEntity<Resource> response = restClient.get()
                 .uri(url)
                 .retrieve()
                 .toEntity(Resource.class);
@@ -82,14 +84,14 @@ public class FileStorageClient implements FileStorage {
         return response.getBody();
     }
 
-    private String readFileContent(Resource resource, String fileKey) {
+    private String readFileContent(Resource resource) {
         try (InputStream is = resource.getInputStream();
              BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 
             return reader.lines().collect(Collectors.joining("\n"));
 
         } catch (RestClientException | IOException e) {
-            throw new FileStorageException(String.format(ErrorMessages.FILE_CONTENT_FETCH_FAILED, fileKey), e);
+            throw new FileStorageException(ErrorMessages.FILE_CONTENT_FETCH_FAILED);
         }
     }
 
