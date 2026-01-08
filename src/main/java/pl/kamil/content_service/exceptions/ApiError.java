@@ -15,10 +15,6 @@ public class ApiError {
     private String path;
     private Instant timestamp;
 
-    public ApiError(String message) {
-
-    }
-
     public ApiError(int status, String message) {
         this.status = status;
         this.message = message;
