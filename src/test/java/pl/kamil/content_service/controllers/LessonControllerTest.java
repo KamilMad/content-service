@@ -10,18 +10,21 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import pl.kamil.content_service.common.ErrorMessages;
+import pl.kamil.content_service.dtos.LessonContentResponse;
 import pl.kamil.content_service.dtos.LessonResponse;
 import pl.kamil.content_service.dtos.LessonsResponse;
-import pl.kamil.content_service.exceptions.AccessDeniedException;
-import pl.kamil.content_service.exceptions.FileProcessingException;
-import pl.kamil.content_service.exceptions.LessonNotFoundException;
+import pl.kamil.content_service.exceptions.ForbiddenAccessException;
+import pl.kamil.content_service.exceptions.ResourceNotFoundException;
+import pl.kamil.content_service.models.Content;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.services.LessonService;
+import pl.kamil.content_service.utils.LessonFactory;
 
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -37,30 +40,31 @@ public class LessonControllerTest {
     @MockBean
     private LessonService lessonService;
 
+    private final UUID lessonId = LessonFactory.TEST_LESSON_ID;
+    private final UUID userId = LessonFactory.TEST_USER_ID;
+
     @Test
     void shouldCreateLessonAndReturnId() throws Exception {
         // Given
-        long userId = 1L;
-        Long lessonId = 42L;
+        MockMultipartFile file = LessonFactory.createMockFile();
+        LessonResponse lessonResponse  = LessonFactory.createLessonResponse();
 
-        MockMultipartFile file = new MockMultipartFile(
-                "file", "lesson.txt", "text/plain", "Sample content".getBytes()
-        );
-
-        when(lessonService.createLesson(file, userId)).thenReturn(lessonId);
+        when(lessonService.createLesson(file, userId)).thenReturn(lessonResponse);
 
         mockMvc.perform(multipart("/lessons")
                 .file(file)
                 .header("X-User-Id", userId))
-                .andExpect(status().isOk())
-                .andExpect(content().string("42"));
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(lessonResponse.id().toString()))
+                .andExpect(jsonPath("$.title").value(lessonResponse.title()))
+                .andExpect(jsonPath("$.createdAt").value(lessonResponse.createdAt().toString()))
+                .andExpect(jsonPath("$.updatedAt").value(lessonResponse.updatedAt().toString()));
 
         verify(lessonService).createLesson(file, userId);
     }
 
     @Test
     void shouldReturnBadRequest_WhenFileIsMissing() throws Exception {
-        long userId = 1L;
         mockMvc.perform(multipart("/lessons")
                 .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest());
@@ -68,12 +72,9 @@ public class LessonControllerTest {
 
     @Test
     void shouldReturnBadRequest_WhenFileIsEmpty() throws Exception {
-
-        long userId = 1L;
-        MockMultipartFile file = new MockMultipartFile("file",
-                "lesson.txt",
-                "text/plain",
-                new byte[0]);
+        
+        MockMultipartFile file = LessonFactory
+                .createCustomMockFile(null, null, new byte[0]);
 
         mockMvc.perform(multipart("/lessons")
                         .file(file)
@@ -83,66 +84,51 @@ public class LessonControllerTest {
 
     @Test
     void shouldReturnBadRequest_WhenUserIdHeaderIsMissing() throws Exception {
-        MockMultipartFile file = new MockMultipartFile(
-                "file", "lesson.txt", "text/plain", "Sample content".getBytes()
-        );
+        MockMultipartFile file = LessonFactory.createMockFile();
+
         mockMvc.perform(multipart("/lessons")
                 .file(file))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Required request header 'X-User-Id' for method parameter type Long is not present"));
+                .andExpect(jsonPath("$.message").value("Required request header 'X-User-Id' for method parameter type UUID is not present"));
     }
 
     @Test
     void shouldThrowFileProcessingException_WhenContentTypeIsUnsupported() throws Exception {
-        long userId = 1L;
 
-        MockMultipartFile mockMultipartFile = new MockMultipartFile("file",
-                "lesson.txt",
-                MediaType.APPLICATION_JSON_VALUE,
-                "Sample content".getBytes()
-                );
-
-        when(lessonService.createLesson(mockMultipartFile, userId))
-                .thenThrow(new FileProcessingException("Unsupported file type: " + mockMultipartFile.getContentType()));
+        MockMultipartFile mockMultipartFile = LessonFactory
+                .createCustomMockFile(null, MediaType.APPLICATION_JSON_VALUE, null);
 
         mockMvc.perform(multipart("/lessons")
                 .file(mockMultipartFile)
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Unsupported file type: " + mockMultipartFile.getContentType()));
+                .andExpect(jsonPath("$.file").value("Invalid content type"));
     }
 
     @Test
     void shouldThrowFileProcessingException_WhenFileSizeIsToBig() throws Exception {
-       long userId = 1L;
-       byte[] largeContent = new byte[2 * 1024 * 1024]; // 2MB
+
+        byte[] largeContent = new byte[2 * 1024 * 1024]; // 2MB
         Arrays.fill(largeContent, (byte)'A');
 
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(
-                "file",
-                "large_file.txt",
-                MediaType.TEXT_PLAIN_VALUE,
-                largeContent
-        );
-
-        when(lessonService.createLesson(mockMultipartFile, userId))
-                .thenThrow(new FileProcessingException("File exceeds the maximum size 1MB"));
+        MockMultipartFile mockMultipartFile = LessonFactory
+                .createCustomMockFile(null, null, largeContent);
 
         mockMvc.perform(multipart("/lessons")
                 .file(mockMultipartFile)
                 .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("File exceeds the maximum size 1MB"));
+                .andExpect(jsonPath("$.file").value("File size exceeds the maximum allowed size"));
     }
 
     @Test
     void getLessons_shouldReturnLessonsWhenUserIdHeaderIsPresent() throws Exception {
         // Given
-        Long userId = 1L;
+        
 
         List<LessonResponse> lessonList = List.of(
-                new LessonResponse(1L, "Lesson 1", 100, Instant.now(), "S3Key"),
-                new LessonResponse(2L, "Lesson 2", 200, Instant.now(), "S3Key")
+                new LessonResponse(UUID.randomUUID(), "Lesson 1", Instant.now(), Instant.now()),
+                new LessonResponse(UUID.randomUUID(), "Lesson 2", Instant.now(), Instant.now())
         );
 
         LessonsResponse expectedResponse = new LessonsResponse(lessonList, lessonList.size());
@@ -164,12 +150,12 @@ public class LessonControllerTest {
         mockMvc.perform(get("/lessons"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
-                        .value("Required request header 'X-User-Id' for method parameter type Long is not present"));
+                        .value("Required request header 'X-User-Id' for method parameter type UUID is not present"));
     }
 
     @Test
     void getLessons_ShouldReturnEmptyList_WhenUserHasNoLessons() throws Exception {
-        long userId = 1L;
+        
         LessonsResponse response = new LessonsResponse(Collections.emptyList(), 0);
 
         when(lessonService.getAllLessons(userId)).thenReturn(response);
@@ -182,7 +168,7 @@ public class LessonControllerTest {
 
     @Test
     void getLessons_ShouldReturn500WhenServiceThrowsException() throws Exception {
-        long userId = 1L;
+        
         when(lessonService.getAllLessons(userId)).thenThrow(new RuntimeException("Something went wrong"));
 
         mockMvc.perform(get("/lessons")
@@ -194,9 +180,8 @@ public class LessonControllerTest {
 
     @Test
     void getLessonById_shouldReturnLessonResponse_whenLessonExistsAndUserIsOwner() throws Exception {
-        long lessonId = 1L;
-        long userId = 2L;
-        Lesson lesson = new Lesson(lessonId, "title", 100, Instant.now(), Instant.now(), userId, "s3key");
+        Content content = new Content();
+        Lesson lesson = new Lesson(lessonId, userId, "title", content, Instant.now(), Instant.now());
         LessonResponse lessonResponse = LessonResponse.from(lesson);
 
         when(lessonService.getLesson(lessonId, userId)).thenReturn(lessonResponse);
@@ -207,12 +192,12 @@ public class LessonControllerTest {
     }
 
     @Test
-    void getLessonById_shouldThrowLessonNotFoundException_whenLessonDoesNotExist() throws Exception {
+    void getLessonById_shouldThrowResourceNotFoundException_whenLessonDoesNotExist() throws Exception {
 
-        long lessonId = 1L;
-        long userId = 2L;
+        
+        
 
-        when(lessonService.getLesson(lessonId, userId)).thenThrow(new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
+        when(lessonService.getLesson(lessonId, userId)).thenThrow(new ResourceNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
 
         mockMvc.perform(get("/lessons/{lessonId}", lessonId)
                         .header("X-User-Id", userId))
@@ -225,10 +210,10 @@ public class LessonControllerTest {
 
     @Test
      void getLessonById_shouldThrowAccessDeniedException_whenUserIsNotLessonOwner() throws Exception {
-         long lessonId = 1L;
-         long userId = 2L;
+         
+         
 
-         when(lessonService.getLesson(lessonId, userId)).thenThrow(new AccessDeniedException(ErrorMessages.ACCESS_DENIED));
+         when(lessonService.getLesson(lessonId, userId)).thenThrow(new ForbiddenAccessException(ErrorMessages.ACCESS_DENIED));
 
          mockMvc.perform(get("/lessons/{lessonId}", lessonId)
                          .header("X-User-Id", userId))
@@ -241,23 +226,22 @@ public class LessonControllerTest {
 
     @Test
      void getLessonById_ShouldReturnBadRequest_WhenUserIdHeaderIsMissing() throws Exception {
-        long lessonId = 1L;
         mockMvc.perform(get("/lessons/{userId}", lessonId))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
-                        .value("Required request header 'X-User-Id' for method parameter type Long is not present"));
+                        .value("Required request header 'X-User-Id' for method parameter type UUID is not present"));
     }
 
 
-    private ResultActions performDeleteLesson(long lessonId, long userId) throws Exception {
+    private ResultActions performDeleteLesson(UUID lessonId, UUID userId) throws Exception {
         return mockMvc.perform(delete("/lessons/{lessonId}", lessonId)
                 .header("X-User-Id", userId));
     }
 
     @Test
     void shouldDeleteLesson_WhenLessonExistsAndUserIsOwner() throws Exception {
-        long lessonId = 1L;
-        long userId = 2L;
+        
+        
 
         performDeleteLesson(lessonId, userId)
                 .andExpect(status().isNoContent());
@@ -267,10 +251,10 @@ public class LessonControllerTest {
 
     @Test
     void deleteLesson_shouldReturnNotFound_whenLessonDoesNotExist() throws Exception {
-        long lessonId = 1L;
-        long userId = 2L;
+        
+        
 
-        doThrow(new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND))
+        doThrow(new ResourceNotFoundException(ErrorMessages.LESSON_NOT_FOUND))
                 .when(lessonService).deleteLesson(lessonId, userId);
 
         performDeleteLesson(lessonId, userId)
@@ -280,10 +264,10 @@ public class LessonControllerTest {
 
     @Test
     void deleteLesson_shouldReturnUnauthorized_whenUserIsNotOwner() throws Exception {
-        long lessonId = 1L;
-        long userId = 2L;
+        
+        
 
-        doThrow(new AccessDeniedException(ErrorMessages.ACCESS_DENIED))
+        doThrow(new ForbiddenAccessException(ErrorMessages.ACCESS_DENIED))
                 .when(lessonService).deleteLesson(lessonId, userId);
 
         performDeleteLesson(lessonId, userId)
@@ -291,33 +275,32 @@ public class LessonControllerTest {
                 .andExpect(jsonPath("$.message").value(ErrorMessages.ACCESS_DENIED));
     }
 
-    private ResultActions performGetLessonContent(long lessonId, long userId) throws Exception {
+    private ResultActions performGetLessonContent(UUID lessonId, UUID userId) throws Exception {
         return mockMvc.perform(get("/lessons/{id}/content", lessonId)
                 .header("X-User-Id", userId));
     }
 
     @Test
     void getContent_shouldReturnLessonContent_whenUserOwnsLesson() throws Exception {
-        // given
-        long lessonId = 1L;
-        long userId = 42L;
-        String expectedContent = "Lesson file content here.";
+        LessonContentResponse lessonContentResponse = LessonFactory.createLessonContentResponse();
 
-        when(lessonService.getLessonContent(lessonId, userId)).thenReturn(expectedContent);
+        when(lessonService.getLessonContent(LessonFactory.TEST_LESSON_ID, LessonFactory.TEST_USER_ID))
+                .thenReturn(lessonContentResponse);
 
         // when & then
-        performGetLessonContent(lessonId, userId)
+        performGetLessonContent(LessonFactory.TEST_LESSON_ID, LessonFactory.TEST_USER_ID)
                 .andExpect(status().isOk())
-                .andExpect(content().string(expectedContent));
+                .andExpect(jsonPath("$.fileText").value(LessonFactory.DEFAULT_FILE_CONTENT))
+                .andExpect(jsonPath("$.totalWords").value(LessonFactory.DEFAULT_TOTAL_WORDS));
     }
 
     @Test
     void getContent_shouldReturn404_whenLessonDoesNotExist() throws Exception {
-        long lessonId = 1L;
-        long userId = 42L;
+        
+        
 
         when(lessonService.getLessonContent(lessonId, userId))
-                .thenThrow(new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
+                .thenThrow(new ResourceNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
 
         performGetLessonContent(lessonId, userId)
                 .andExpect(status().isNotFound())
@@ -326,11 +309,11 @@ public class LessonControllerTest {
 
     @Test
     void getContent_shouldReturn403_whenUserDoesNotOwnLesson() throws Exception {
-        long lessonId = 1L;
-        long userId = 42L;
+        
+        
 
         when(lessonService.getLessonContent(lessonId, userId))
-                .thenThrow(new AccessDeniedException(ErrorMessages.ACCESS_DENIED));
+                .thenThrow(new ForbiddenAccessException(ErrorMessages.ACCESS_DENIED));
 
         performGetLessonContent(lessonId, userId)
                 .andExpect(status().isForbidden())
@@ -339,7 +322,7 @@ public class LessonControllerTest {
 
     @Test
     void getContent_shouldReturn400_whenUserIdHeaderMissing() throws Exception {
-        mockMvc.perform(get("/lessons/{id}/content", 1L))
+        mockMvc.perform(get("/lessons/{id}/content", lessonId))
                 .andExpect(status().isBadRequest());
     }
 }

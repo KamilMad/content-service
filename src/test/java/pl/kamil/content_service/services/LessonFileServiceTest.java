@@ -80,7 +80,7 @@ public class LessonFileServiceTest {
                         .body(errorJson));
 
         FileStorageException exception = assertThrows(FileStorageException.class, () -> lessonFileService.storeFile(mockFile));
-        assertEquals(ErrorMessages.FILE_STORAGE_RESPONSE_INVALID, exception.getMessage());
+        assertEquals(ErrorMessages.FILE_UPLOAD_FAILED, exception.getMessage());
     }
 
     @Test
@@ -91,6 +91,6 @@ public class LessonFileServiceTest {
                         .contentType(MediaType.APPLICATION_JSON));
 
         FileStorageException exception = assertThrows(FileStorageException.class, () -> lessonFileService.storeFile(mockFile));
-        assertEquals(ErrorMessages.FILE_STORAGE_RESPONSE_INVALID, exception.getMessage());
+        assertEquals(ErrorMessages.FILE_UPLOAD_FAILED, exception.getMessage());
     }
 }
