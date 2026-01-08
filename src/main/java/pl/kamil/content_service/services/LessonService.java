@@ -12,8 +12,8 @@ import pl.kamil.content_service.dtos.LessonContentResponse;
 import pl.kamil.content_service.dtos.LessonResponse;
 import pl.kamil.content_service.dtos.LessonsResponse;
 import pl.kamil.content_service.events.LessonDeleteEvent;
-import pl.kamil.content_service.exceptions.LessonContentNotFoundException;
-import pl.kamil.content_service.exceptions.LessonNotFoundException;
+import pl.kamil.content_service.exceptions.ForbiddenAccessException;
+import pl.kamil.content_service.exceptions.ResourceNotFoundException;
 import pl.kamil.content_service.models.Content;
 import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
@@ -50,7 +50,8 @@ public class LessonService {
     }
 
     public LessonResponse getLesson(UUID lessonId, UUID userId) {
-        Lesson lesson = fetchLesson(lessonId, userId);
+        Lesson lesson = getLessonOrThrow(lessonId);
+        ensureOwnership(lesson, userId);
         return LessonResponse.from(lesson);
     }
 
@@ -65,7 +66,8 @@ public class LessonService {
 
     @Transactional
     public void deleteLesson(UUID lessonId, UUID userId) {
-        Lesson lesson = fetchLesson(lessonId, userId);
+        Lesson lesson = getLessonOrThrow(lessonId);
+        ensureOwnership(lesson, userId);
         String fileKey = lesson.getContent().getS3Key();
         lessonRepository.delete(lesson);
 
@@ -75,7 +77,8 @@ public class LessonService {
     }
 
     public LessonContentResponse getLessonContent(UUID lessonId, UUID userId) {
-        Lesson lesson = fetchLesson(lessonId, userId);
+        Lesson lesson = getLessonOrThrow(lessonId);
+        ensureOwnership(lesson, userId);
         Content content = fetchContent(lesson);
         String fileText =  fetchLessonTextFromS3(content);
         return new LessonContentResponse(fileText, content.getTotalWords());
@@ -116,21 +119,27 @@ public class LessonService {
         }
     }
 
-    private Lesson fetchLesson(UUID lessonId, UUID userId) {
-        return lessonRepository.findByIdAndCreatedBy(lessonId, userId)
-                .orElseThrow(() -> new LessonNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
-    }
-
     private Content fetchContent(Lesson lesson) {
         Content content = lesson.getContent();
         if (content == null) {
             log.warn("Content not found for lesson with id: {}",lesson.getId());
-            throw new LessonContentNotFoundException(ErrorMessages.LESSON_CONTENT_NOT_FOUND);
+            throw new ResourceNotFoundException(ErrorMessages.LESSON_CONTENT_NOT_FOUND);
         }
         return content;
     }
 
     private String fetchLessonTextFromS3(Content content) {
         return fileStorageClient.getFileContent(content.getS3Key());
+    }
+
+    private Lesson getLessonOrThrow(UUID lessonId) {
+        return lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
+    }
+
+    private void ensureOwnership(Lesson lesson, UUID userId) {
+        if (!lesson.getCreatedBy().equals(userId)) {
+            throw new ForbiddenAccessException(ErrorMessages.ACCESS_DENIED);
+        }
     }
 }
