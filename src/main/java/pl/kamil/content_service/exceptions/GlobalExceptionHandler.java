@@ -34,8 +34,8 @@ public class GlobalExceptionHandler {
     }
 
 
-    @ExceptionHandler(LessonNotFoundException.class)
-    public ResponseEntity<ApiError> handleLessonNotFoundException(LessonNotFoundException e, HttpServletRequest request) {
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiError> handleResourceNotFoundException(ResourceNotFoundException e, HttpServletRequest request) {
 
         ApiError error = new ApiError(
                 HttpStatus.NOT_FOUND.value(),
@@ -44,18 +44,6 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-    }
-
-    @ExceptionHandler(FileUploadException.class)
-    public ResponseEntity<ApiError> handleFileUploadException(FileUploadException e, HttpServletRequest request) {
-
-        ApiError error = new ApiError(
-                HttpStatus.BAD_GATEWAY.value(),
-                e.getMessage(),
-                request.getRequestURI()
-        );
-
-        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(error);
     }
 
     @ExceptionHandler(FileStorageException.class)
@@ -82,8 +70,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiError> handleAccessDeniedException(AccessDeniedException e, HttpServletRequest request) {
+    @ExceptionHandler(ForbiddenAccessException.class)
+    public ResponseEntity<ApiError> handleForbiddenAccessException(ForbiddenAccessException e, HttpServletRequest request) {
 
         ApiError error = new ApiError(
                 HttpStatus.FORBIDDEN.value(),
@@ -146,15 +134,6 @@ public class GlobalExceptionHandler {
                 "File is missing. Please attach a file under 'file' part.",
                 request.getRequestURI());
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-    }
-
-    @ExceptionHandler(LessonContentNotFoundException.class)
-    public ResponseEntity<ApiError> handleLessonContentNotFoundException(LessonContentNotFoundException e, HttpServletRequest request) {
-        ApiError error = new ApiError(
-                HttpStatus.BAD_REQUEST.value(),
-                e.getMessage(),
-                request.getRequestURI());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 }
