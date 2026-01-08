@@ -25,12 +25,12 @@ public final class LessonController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<LessonResponse> createLesson(
-            @RequestHeader("X-User-Id") final UUID userId,
-            @Valid @ModelAttribute final FileUploadRequest request) throws IOException {
+            @RequestHeader("X-User-Id")  UUID userId,
+            @Valid @ModelAttribute  FileUploadRequest request) throws IOException {
 
-        final LessonResponse response =  lessonService.createLesson(request.file(), userId);
+         LessonResponse response =  lessonService.createLesson(request.file(), userId);
 
-        final URI location = ServletUriComponentsBuilder
+         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(response.id())
@@ -41,25 +41,25 @@ public final class LessonController {
 
     @GetMapping
     public ResponseEntity<LessonsResponse> getLessons(
-            @RequestHeader("X-User-Id") final UUID userId) {
+            @RequestHeader("X-User-Id")  UUID userId) {
 
-        final LessonsResponse response = lessonService.getAllLessons(userId);
+         LessonsResponse response = lessonService.getAllLessons(userId);
         return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<LessonResponse> getLessonById(
-            @PathVariable("id") final UUID lessonId,
-            @RequestHeader("X-User-Id") final UUID userId) {
+            @PathVariable("id")  UUID lessonId,
+            @RequestHeader("X-User-Id")  UUID userId) {
 
-        final LessonResponse response = lessonService.getLesson(lessonId, userId);
+         LessonResponse response = lessonService.getLesson(lessonId, userId);
         return ResponseEntity.ok().body(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLesson(
-            @PathVariable("id") final UUID lessonId,
-            @RequestHeader("X-User-Id") final UUID userId) {
+            @PathVariable("id")  UUID lessonId,
+            @RequestHeader("X-User-Id")  UUID userId) {
 
         lessonService.deleteLesson(lessonId, userId);
         return ResponseEntity.noContent().build();
@@ -67,10 +67,10 @@ public final class LessonController {
 
     @GetMapping("/{id}/content")
     public ResponseEntity<LessonContentResponse> getContent(
-            @PathVariable("id") final UUID lessonId,
-            @RequestHeader("X-User-Id") final UUID userId) {
+            @PathVariable("id")  UUID lessonId,
+            @RequestHeader("X-User-Id")  UUID userId) {
 
-        final LessonContentResponse contentResponse = lessonService.getLessonContent(lessonId, userId);
+         LessonContentResponse contentResponse = lessonService.getLessonContent(lessonId, userId);
         return ResponseEntity.ok().body(contentResponse);
     }
 
