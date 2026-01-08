@@ -19,7 +19,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/lessons")
 @RequiredArgsConstructor
-public final class LessonController {
+public class LessonController {
 
     private final LessonService lessonService;
 
