@@ -1,10 +1,12 @@
 package pl.kamil.content_service.dtos;
 
+import lombok.Builder;
 import pl.kamil.content_service.models.Lesson;
 
 import java.time.Instant;
 import java.util.UUID;
 
+@Builder(toBuilder = true)
 public record LessonResponse(
         UUID id,
         String title,
