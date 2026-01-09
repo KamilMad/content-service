@@ -1,0 +1,17 @@
+# Ignore build output, we only need the JAR
+target/
+build/
+
+# IDE / editor files
+.idea/
+.vscode/
+*.iml
+
+# Git metadata
+.git
+.gitignore
+
+# Logs, temporary files
+*.log
+*.tmp
+tmp/
