@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -13,6 +14,7 @@ public class ApiError {
     private int status;
     private String message;
     private String path;
+    Map<String, String> errors;
     private Instant timestamp;
 
     public ApiError(int status, String message) {
@@ -28,4 +30,5 @@ public class ApiError {
         this.path = path;
         this.timestamp = Instant.now();
     }
+
 }
