@@ -1,9 +1,13 @@
 package pl.kamil.content_service.models;
 
 import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -14,6 +18,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
+@EntityListeners(AuditingEntityListener.class)
 public class Lesson {
 
     @Id
@@ -26,9 +31,9 @@ public class Lesson {
     @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL)
     private Content content;
 
-    @CreationTimestamp
+    @CreatedDate
     private Instant createdAt;
-    @UpdateTimestamp
+    @LastModifiedDate
     private Instant updatedAt;
 
 }
