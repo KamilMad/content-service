@@ -30,8 +30,8 @@ public class FileStorageClient implements FileStorage {
     @Value("${file.upload.url}")
     private String FILE_UPLOAD_URL;
 
-    public FileStorageClient(RestClient.Builder builder) {
-        this.restClient = builder.build();
+    public FileStorageClient(RestClient restClient) {
+        this.restClient = restClient;
     }
 
     public FileUploadResponse storeFile(MultipartFile file) {
