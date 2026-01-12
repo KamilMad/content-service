@@ -1,5 +1,4 @@
 # Ignore build output, we only need the JAR
-target/
 build/
 
 # IDE / editor files
