@@ -11,6 +11,8 @@ import pl.kamil.content_service.dtos.LessonContentResponse;
 import pl.kamil.content_service.dtos.LessonResponse;
 import pl.kamil.content_service.dtos.LessonsResponse;
 import pl.kamil.content_service.services.LessonService;
+import pl.kamil.content_service.validation.annotations.CurrentUserId;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
@@ -25,7 +27,7 @@ public class LessonController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<LessonResponse> createLesson(
-            @RequestHeader("X-User-Id")  UUID userId,
+            @CurrentUserId UUID userId,
             @Valid @ModelAttribute  FileUploadRequest request) throws IOException {
 
          LessonResponse response =  lessonService.createLesson(request.file(), userId);
