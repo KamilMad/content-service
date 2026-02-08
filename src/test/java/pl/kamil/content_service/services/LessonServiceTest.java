@@ -6,6 +6,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,7 +25,6 @@ import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
 import pl.kamil.content_service.utils.LessonFactory;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -118,32 +121,23 @@ public class LessonServiceTest {
         verify(fileStorageClient).storeFile(mockFile);
     }
 
-//    @Test
-//    void shouldSaveLessonWithCorrectUserIdAndS3key() {
-//        // Given
-//        MockMultipartFile mockFile = new MockMultipartFile(
-//                "file",
-//                "test.txt",
-//                "text/plain",
-//                "Hello, World!".getBytes());
-//
-//
-//        when(lessonFileService.storeFile(mockFile)).thenReturn(new FileUploadResponse("s3key"));
-//
-//        // Mock the repository save to return something
-//        Lesson mockSavedLesson = new Lesson();
-//        mockSavedLesson.setId(42L);
-//        when(lessonRepository.save(any(Lesson.class))).thenReturn(mockSavedLesson);
-//
-//        // When
-//        lessonService.createLesson(mockFile, userId);
-//
-//        // Then
-//        verify(lessonRepository).save(argThat(lesson ->
-//                lesson.getCreatedBy() == userId &&
-//                        lesson.getS3Key().equals("s3key")));
-//
-//    }
+    @Test
+    void shouldSaveLessonWithCorrectData() {
+        // Given
+        MockMultipartFile mockFile = LessonFactory.createMockFile();
+
+        Lesson mockSavedLesson = LessonFactory.createLessonWithContent();
+
+        when(fileStorageClient.storeFile(mockFile)).thenReturn(new FileUploadResponse(LessonFactory.DEFAULT_S3_KEY));
+        when(lessonRepository.save(any(Lesson.class))).thenReturn(mockSavedLesson);
+
+        // When
+        lessonService.createLesson(mockFile, userId);
+
+        verify(lessonRepository).save(argThat(lesson ->
+                lesson.getCreatedBy().equals(userId) &&
+                lesson.getTitle().equals(mockSavedLesson.getTitle())));
+    }
 
     @Test
     void shouldSuccessfullyReturnLessonById() {
@@ -189,43 +183,60 @@ public class LessonServiceTest {
 
     @Test
     void shouldSuccessfullyGetAllLessonsForProvidedUserId() {
-        // Given
+        int pageNo = 0;
+        int pageSize = 10;
         List<Lesson> lessons = LessonFactory.createLessonList(3);
-        when(lessonRepository.findAllByCreatedBy(userId)).thenReturn(lessons);
+        Page<Lesson> lessonPage = new PageImpl<>(lessons, PageRequest.of(pageNo, pageSize), 3);
+
+        when(lessonRepository.findAllByCreatedBy(eq(userId), any(Pageable.class)))
+                .thenReturn(lessonPage);
 
         // When
-        LessonsResponse response = lessonService.getAllLessons(userId);
+        LessonsResponse response = lessonService.getAllLessons(userId, pageNo, pageSize);
 
         // Then
-        assertEquals(response.total(), lessons.size());
+        assertNotNull(response);
+        assertEquals(3, response.lessons().size());
+        assertEquals(pageNo, response.page());
+        assertEquals(pageSize, response.size());
+        assertEquals(3, response.totalElements());
+        assertEquals(1, response.totalPages());
+        assertTrue(response.last());
 
-        assertEquals(lessons.get(0).getTitle(), response.lessons().get(0).title());
-        assertEquals(lessons.get(1).getTitle(), response.lessons().get(1).title());
+        verify(lessonRepository).findAllByCreatedBy(eq(userId), any(Pageable.class));
 
     }
 
     @Test
     void shouldReturnEmptyList_WhenNoLessonExist() {
         // Given
-        
-        when(lessonRepository.findAllByCreatedBy(userId)).thenReturn(Collections.emptyList());
+        int pageNo = 0;
+        int pageSize = 10;
+        Page<Lesson> emptyPage = new PageImpl<>(List.of(), PageRequest.of(pageNo, pageSize), 0);
+
+        when(lessonRepository.findAllByCreatedBy(eq(userId), any(Pageable.class)))
+                .thenReturn(emptyPage);
 
         // When
-        LessonsResponse response = lessonService.getAllLessons(userId);
+        LessonsResponse response = lessonService.getAllLessons(userId, pageNo, pageSize);
 
         // Then
         assertNotNull(response);
         assertTrue(response.lessons().isEmpty());
-        assertEquals(0, response.total());
+        assertEquals(0, response.page());
+        assertEquals(10, response.size());
+        assertEquals(0, response.totalElements());
+        assertTrue(response.last());
     }
 
     @Test
     void shouldThrowException_WhenDBFails() {
-        
+        int pageNo = 0;
+        int pageSize = 10;
         RuntimeException dbException = new RuntimeException("DB error");
-        when(lessonRepository.findAllByCreatedBy(userId)).thenThrow(dbException);
+        when(lessonRepository.findAllByCreatedBy(eq(userId), any(Pageable.class))).thenThrow(dbException);
 
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> lessonService.getAllLessons(userId));
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> lessonService.getAllLessons(userId, pageNo, pageSize));
         assertEquals("DB error", thrown.getMessage());
     }
 

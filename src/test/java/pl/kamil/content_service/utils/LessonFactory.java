@@ -52,7 +52,7 @@ public class LessonFactory {
     public static LessonResponse createLessonResponse() {
         return LessonResponse.builder()
                 .id(TEST_LESSON_ID)
-                .title(DEFAULT_TITLE)
+                .title(DEFAULT_ORIGINAL_FILENAME)
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
                 .build();
@@ -80,7 +80,7 @@ public class LessonFactory {
         return Lesson.builder()
                 .id(TEST_LESSON_ID)
                 .createdBy(TEST_USER_ID)
-                .title(DEFAULT_TITLE)
+                .title(DEFAULT_ORIGINAL_FILENAME)
                 .content(null)
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
@@ -91,7 +91,7 @@ public class LessonFactory {
         return IntStream.range(0, count)
                 .mapToObj(i -> createLesson().toBuilder()
                         .id(UUID.randomUUID())
-                        .title(DEFAULT_TITLE + " " + i)
+                        .title(DEFAULT_ORIGINAL_FILENAME + " " + i)
                                 .build()
                         ).toList();
     }

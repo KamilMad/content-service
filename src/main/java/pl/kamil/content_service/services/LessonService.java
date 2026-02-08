@@ -4,6 +4,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.common.ErrorMessages;
@@ -19,7 +22,6 @@ import pl.kamil.content_service.models.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
 import pl.kamil.content_service.util.TextAnalyzer;
 
-import java.util.List;
 import java.util.UUID;
 
 
@@ -55,11 +57,14 @@ public class LessonService {
         return LessonResponse.from(lesson);
     }
 
-    public LessonsResponse getAllLessons(UUID userId) {
-        List<Lesson> lessons = lessonRepository.findAllByCreatedBy(userId);
-        List<LessonResponse> lessonResponses = lessons.stream()
-                .map(LessonResponse::from)
-                .toList();
+    public LessonsResponse getAllLessons(UUID userId, int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Page<Lesson> lessons = lessonRepository.findAllByCreatedBy(userId, pageable);
+
+        Page<LessonResponse> lessonResponses = lessons.map(LessonResponse::from);
+//        List<LessonResponse> lessonResponses = lessons.getContent().stream()
+//                .map(LessonResponse::from)
+//                .toList();
 
         return LessonsResponse.from(lessonResponses);
     }

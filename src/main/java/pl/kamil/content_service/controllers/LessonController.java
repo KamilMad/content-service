@@ -45,9 +45,11 @@ public class LessonController {
 
     @GetMapping
     public ResponseEntity<LessonsResponse> getLessons(
-            @CurrentUserId  UUID userId) {
+            @CurrentUserId  UUID userId,
+            @RequestParam(value = "pageNo", defaultValue = "0") int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
 
-         LessonsResponse response = lessonService.getAllLessons(userId);
+         LessonsResponse response = lessonService.getAllLessons(userId, pageNo, pageSize);
         return ResponseEntity.ok().body(response);
     }
 
