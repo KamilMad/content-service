@@ -36,4 +36,11 @@ public class Lesson {
     @LastModifiedDate
     private Instant updatedAt;
 
+    public void setContent(Content content) {
+        this.content = content;
+        if (content != null) {
+            content.setLesson(this);
+        }
+    }
+
 }
