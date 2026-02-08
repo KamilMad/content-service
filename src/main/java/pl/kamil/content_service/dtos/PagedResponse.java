@@ -4,8 +4,8 @@ import org.springframework.data.domain.Page;
 
 import java.util.List;
 
-public record LessonsResponse(
-        List<LessonResponse> lessons,
+public record PagedResponse<T>(
+        List<T> content,
         int page,
         int size,
         long totalElements,
@@ -13,8 +13,8 @@ public record LessonsResponse(
         boolean last
 ) {
 
-    public static LessonsResponse from(Page<LessonResponse> page) {
-        return new LessonsResponse(
+    public static <T>PagedResponse<T> from(Page<T> page) {
+        return new PagedResponse<>(
                 page.getContent(),
                 page.getNumber(),
                 page.getSize(),

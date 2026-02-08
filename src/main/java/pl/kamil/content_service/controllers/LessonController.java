@@ -10,7 +10,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pl.kamil.content_service.dtos.FileUploadRequest;
 import pl.kamil.content_service.dtos.LessonContentResponse;
 import pl.kamil.content_service.dtos.LessonResponse;
-import pl.kamil.content_service.dtos.LessonsResponse;
+import pl.kamil.content_service.dtos.PagedResponse;
 import pl.kamil.content_service.services.LessonService;
 import pl.kamil.content_service.validation.annotations.CurrentUserId;
 
@@ -20,7 +20,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/lessons")
+@RequestMapping("/content")
 @RequiredArgsConstructor
 public class LessonController {
 
@@ -44,12 +44,12 @@ public class LessonController {
     }
 
     @GetMapping
-    public ResponseEntity<LessonsResponse> getLessons(
+    public ResponseEntity<PagedResponse<LessonResponse>> getLessons(
             @CurrentUserId  UUID userId,
             @RequestParam(value = "pageNo", defaultValue = "0") int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
 
-         LessonsResponse response = lessonService.getAllLessons(userId, pageNo, pageSize);
+         PagedResponse<LessonResponse> response = lessonService.getAllLessons(userId, pageNo, pageSize);
         return ResponseEntity.ok().body(response);
     }
 

@@ -17,7 +17,7 @@ import pl.kamil.content_service.common.ErrorMessages;
 import pl.kamil.content_service.dtos.FileUploadResponse;
 import pl.kamil.content_service.dtos.LessonContentResponse;
 import pl.kamil.content_service.dtos.LessonResponse;
-import pl.kamil.content_service.dtos.LessonsResponse;
+import pl.kamil.content_service.dtos.PagedResponse;
 import pl.kamil.content_service.exceptions.FileProcessingException;
 import pl.kamil.content_service.exceptions.ForbiddenAccessException;
 import pl.kamil.content_service.exceptions.ResourceNotFoundException;
@@ -192,11 +192,11 @@ public class LessonServiceTest {
                 .thenReturn(lessonPage);
 
         // When
-        LessonsResponse response = lessonService.getAllLessons(userId, pageNo, pageSize);
+        PagedResponse response = lessonService.getAllLessons(userId, pageNo, pageSize);
 
         // Then
         assertNotNull(response);
-        assertEquals(3, response.lessons().size());
+        assertEquals(3, response.content().size());
         assertEquals(pageNo, response.page());
         assertEquals(pageSize, response.size());
         assertEquals(3, response.totalElements());
@@ -218,11 +218,11 @@ public class LessonServiceTest {
                 .thenReturn(emptyPage);
 
         // When
-        LessonsResponse response = lessonService.getAllLessons(userId, pageNo, pageSize);
+        PagedResponse response = lessonService.getAllLessons(userId, pageNo, pageSize);
 
         // Then
         assertNotNull(response);
-        assertTrue(response.lessons().isEmpty());
+        assertTrue(response.content().isEmpty());
         assertEquals(0, response.page());
         assertEquals(10, response.size());
         assertEquals(0, response.totalElements());

@@ -13,7 +13,7 @@ import pl.kamil.content_service.common.ErrorMessages;
 import pl.kamil.content_service.dtos.FileUploadResponse;
 import pl.kamil.content_service.dtos.LessonContentResponse;
 import pl.kamil.content_service.dtos.LessonResponse;
-import pl.kamil.content_service.dtos.LessonsResponse;
+import pl.kamil.content_service.dtos.PagedResponse;
 import pl.kamil.content_service.events.LessonDeleteEvent;
 import pl.kamil.content_service.exceptions.ForbiddenAccessException;
 import pl.kamil.content_service.exceptions.ResourceNotFoundException;
@@ -57,16 +57,12 @@ public class LessonService {
         return LessonResponse.from(lesson);
     }
 
-    public LessonsResponse getAllLessons(UUID userId, int pageNo, int pageSize) {
+    public PagedResponse<LessonResponse> getAllLessons(UUID userId, int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
         Page<Lesson> lessons = lessonRepository.findAllByCreatedBy(userId, pageable);
 
         Page<LessonResponse> lessonResponses = lessons.map(LessonResponse::from);
-//        List<LessonResponse> lessonResponses = lessons.getContent().stream()
-//                .map(LessonResponse::from)
-//                .toList();
-
-        return LessonsResponse.from(lessonResponses);
+        return PagedResponse.from(lessonResponses);
     }
 
     @Transactional

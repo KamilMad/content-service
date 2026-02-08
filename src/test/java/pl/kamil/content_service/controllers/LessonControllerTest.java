@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import pl.kamil.content_service.common.ErrorMessages;
 import pl.kamil.content_service.dtos.LessonContentResponse;
 import pl.kamil.content_service.dtos.LessonResponse;
-import pl.kamil.content_service.dtos.LessonsResponse;
+import pl.kamil.content_service.dtos.PagedResponse;
 import pl.kamil.content_service.exceptions.ForbiddenAccessException;
 import pl.kamil.content_service.exceptions.ResourceNotFoundException;
 import pl.kamil.content_service.models.Content;
@@ -51,7 +51,7 @@ public class LessonControllerTest {
 
         when(lessonService.createLesson(file, userId)).thenReturn(lessonResponse);
 
-        mockMvc.perform(multipart("/lessons")
+        mockMvc.perform(multipart("/content")
                 .file(file)
                 .header("X-User-Id", userId))
                 .andExpect(status().isCreated())
@@ -65,7 +65,7 @@ public class LessonControllerTest {
 
     @Test
     void shouldReturnBadRequest_WhenFileIsMissing() throws Exception {
-        mockMvc.perform(multipart("/lessons")
+        mockMvc.perform(multipart("/content")
                 .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest());
     }
@@ -76,7 +76,7 @@ public class LessonControllerTest {
         MockMultipartFile file = LessonFactory
                 .createCustomMockFile(null, null, new byte[0]);
 
-        mockMvc.perform(multipart("/lessons")
+        mockMvc.perform(multipart("/content")
                         .file(file)
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest());
@@ -86,7 +86,7 @@ public class LessonControllerTest {
     void shouldReturnBadRequest_WhenUserIdHeaderIsMissing() throws Exception {
         MockMultipartFile file = LessonFactory.createMockFile();
 
-        mockMvc.perform(multipart("/lessons")
+        mockMvc.perform(multipart("/content")
                 .file(file))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Required request header 'X-User-Id' for method parameter type UUID is not present"));
@@ -98,7 +98,7 @@ public class LessonControllerTest {
         MockMultipartFile mockMultipartFile = LessonFactory
                 .createCustomMockFile(null, MediaType.APPLICATION_JSON_VALUE, null);
 
-        mockMvc.perform(multipart("/lessons")
+        mockMvc.perform(multipart("/content")
                 .file(mockMultipartFile)
                         .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
@@ -114,7 +114,7 @@ public class LessonControllerTest {
         MockMultipartFile mockMultipartFile = LessonFactory
                 .createCustomMockFile(null, null, largeContent);
 
-        mockMvc.perform(multipart("/lessons")
+        mockMvc.perform(multipart("/content")
                 .file(mockMultipartFile)
                 .header("X-User-Id", userId))
                 .andExpect(status().isBadRequest())
@@ -131,23 +131,23 @@ public class LessonControllerTest {
                 new LessonResponse(UUID.randomUUID(), "Lesson 2", Instant.now(), Instant.now())
         );
 
-        LessonsResponse expectedResponse = new LessonsResponse(lessonList, 0, 10, 2, 1, true);
+        PagedResponse expectedResponse = new PagedResponse(lessonList, 0, 10, 2, 1, true);
 
         when(lessonService.getAllLessons(userId, 0, 10)).thenReturn(expectedResponse);
 
-        mockMvc.perform(get("/lessons")
+        mockMvc.perform(get("/content")
                 .header("X-User-Id", userId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.lessons.length()").value(2))
-                .andExpect(jsonPath("$.lessons[0].title").value("Lesson 1"))
-                .andExpect(jsonPath("$.lessons[1].title").value("Lesson 2"))
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].title").value("Lesson 1"))
+                .andExpect(jsonPath("$.content[1].title").value("Lesson 2"))
                 .andExpect(jsonPath("$.total").value(2));
     }
 
     @Test
     void getLessons_ShouldReturnBadRequest_WhenUserIdHeaderIsMissing() throws Exception {
 
-        mockMvc.perform(get("/lessons"))
+        mockMvc.perform(get("/content"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
                         .value("Required request header 'X-User-Id' for method parameter type UUID is not present"));
@@ -160,10 +160,10 @@ public class LessonControllerTest {
 //
 //        when(lessonService.getAllLessons(userId)).thenReturn(response);
 //
-//        mockMvc.perform(get("/lessons")
+//        mockMvc.perform(get("/content")
 //                .header("X-User-Id", userId))
 //                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.lessons.length()").value(0));
+//                .andExpect(jsonPath("$.content.length()").value(0));
 //    }
 //
 //    @Test
@@ -171,7 +171,7 @@ public class LessonControllerTest {
 //
 //        when(lessonService.getAllLessons(userId)).thenThrow(new RuntimeException("Something went wrong"));
 //
-//        mockMvc.perform(get("/lessons")
+//        mockMvc.perform(get("/content")
 //                .header("X-User-Id", userId))
 //                .andExpect(status().isInternalServerError())
 //                .andExpect(jsonPath("$.message").value("Something went wrong"));
@@ -186,7 +186,7 @@ public class LessonControllerTest {
 
         when(lessonService.getLesson(lessonId, userId)).thenReturn(lessonResponse);
 
-        mockMvc.perform(get("/lessons/{lessonId}", lessonId)
+        mockMvc.perform(get("/content/{lessonId}", lessonId)
                 .header("X-User-Id", userId))
                 .andExpect(status().isOk());
     }
@@ -199,7 +199,7 @@ public class LessonControllerTest {
 
         when(lessonService.getLesson(lessonId, userId)).thenThrow(new ResourceNotFoundException(ErrorMessages.LESSON_NOT_FOUND));
 
-        mockMvc.perform(get("/lessons/{lessonId}", lessonId)
+        mockMvc.perform(get("/content/{lessonId}", lessonId)
                         .header("X-User-Id", userId))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(ErrorMessages.LESSON_NOT_FOUND));
@@ -215,7 +215,7 @@ public class LessonControllerTest {
 
          when(lessonService.getLesson(lessonId, userId)).thenThrow(new ForbiddenAccessException(ErrorMessages.ACCESS_DENIED));
 
-         mockMvc.perform(get("/lessons/{lessonId}", lessonId)
+         mockMvc.perform(get("/content/{lessonId}", lessonId)
                          .header("X-User-Id", userId))
                  .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value(ErrorMessages.ACCESS_DENIED));
@@ -226,7 +226,7 @@ public class LessonControllerTest {
 
     @Test
      void getLessonById_ShouldReturnBadRequest_WhenUserIdHeaderIsMissing() throws Exception {
-        mockMvc.perform(get("/lessons/{userId}", lessonId))
+        mockMvc.perform(get("/content/{userId}", lessonId))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
                         .value("Required request header 'X-User-Id' for method parameter type UUID is not present"));
@@ -234,7 +234,7 @@ public class LessonControllerTest {
 
 
     private ResultActions performDeleteLesson(UUID lessonId, UUID userId) throws Exception {
-        return mockMvc.perform(delete("/lessons/{lessonId}", lessonId)
+        return mockMvc.perform(delete("/content/{lessonId}", lessonId)
                 .header("X-User-Id", userId));
     }
 
@@ -276,7 +276,7 @@ public class LessonControllerTest {
     }
 
     private ResultActions performGetLessonContent(UUID lessonId, UUID userId) throws Exception {
-        return mockMvc.perform(get("/lessons/{id}/content", lessonId)
+        return mockMvc.perform(get("/content/{id}/content", lessonId)
                 .header("X-User-Id", userId));
     }
 
@@ -322,7 +322,7 @@ public class LessonControllerTest {
 
     @Test
     void getContent_shouldReturn400_whenUserIdHeaderMissing() throws Exception {
-        mockMvc.perform(get("/lessons/{id}/content", lessonId))
+        mockMvc.perform(get("/content/{id}/content", lessonId))
                 .andExpect(status().isBadRequest());
     }
 }
