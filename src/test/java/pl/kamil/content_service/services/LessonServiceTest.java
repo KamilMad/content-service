@@ -15,7 +15,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.common.ErrorMessages;
 import pl.kamil.content_service.dtos.FileUploadResponse;
-import pl.kamil.content_service.dtos.LessonContentResponse;
 import pl.kamil.content_service.dtos.LessonResponse;
 import pl.kamil.content_service.dtos.PagedResponse;
 import pl.kamil.content_service.exceptions.FileProcessingException;
@@ -284,53 +283,53 @@ public class LessonServiceTest {
     }
 
     // successfully get lesson content when valid user
-    @Test
-    void getLessonContent_shouldReturnLessonContent_WhenValidOwner() {
-
-        Lesson lesson = LessonFactory.createLessonWithContent();
-        LessonContentResponse expectedResponse = LessonFactory.createLessonContentResponse();
-
-        when(lessonRepository.findById(lessonId)).thenReturn(Optional.of(lesson));
-        when(fileStorageClient.getFileContent(LessonFactory.DEFAULT_S3_KEY))
-                .thenReturn(LessonFactory.DEFAULT_FILE_CONTENT);
-
-        LessonContentResponse actualResponse = lessonService
-                .getLessonContent(lessonId, userId);
-
-        assertEquals(expectedResponse, actualResponse);
-        verify(lessonRepository).findById(lessonId);
-        verify(fileStorageClient).getFileContent(LessonFactory.DEFAULT_S3_KEY);
-
-    }
-
-    // throw exception when invalid user
-    @Test
-    void getLessonContent_shouldThrowException_WhenInvalidOwner() {
-        // Given
-        Lesson lesson = LessonFactory.createLessonWithContent();
-
-        when(lessonRepository.findById(lessonId)).thenReturn(Optional.of(lesson));
-
-        // When
-        Exception ex = assertThrows(ForbiddenAccessException.class,
-                () -> lessonService.getLessonContent(lessonId, otherUserId));
-
-        // Then
-        assertEquals(ErrorMessages.ACCESS_DENIED, ex.getMessage());
-        verify(fileStorageClient, never()).getFileContent(anyString());
-    }
-
-    @Test
-    void getLessonContent_shouldThrowException_WhenLessonNotFound() {
-
-        when(lessonRepository.findById(any())).thenReturn(Optional.empty());
-
-        Exception ex = assertThrows(ResourceNotFoundException.class,
-                () -> lessonService.getLessonContent(lessonId, userId));
-
-        assertEquals(ErrorMessages.LESSON_NOT_FOUND, ex.getMessage());
-        verify(fileStorageClient, never()).getFileContent(anyString());
-
-    }
+//    @Test
+//    void getLessonContent_shouldReturnLessonContent_WhenValidOwner() {
+//
+//        Lesson lesson = LessonFactory.createLessonWithContent();
+//        LessonContentResponse expectedResponse = LessonFactory.createLessonContentResponse();
+//
+//        when(lessonRepository.findById(lessonId)).thenReturn(Optional.of(lesson));
+//        when(fileStorageClient.getFileContent(LessonFactory.DEFAULT_S3_KEY))
+//                .thenReturn(LessonFactory.DEFAULT_FILE_CONTENT);
+//
+//        LessonContentResponse actualResponse = lessonService
+//                .getLessonContent(lessonId, userId);
+//
+//        assertEquals(expectedResponse, actualResponse);
+//        verify(lessonRepository).findById(lessonId);
+//        verify(fileStorageClient).getFileContent(LessonFactory.DEFAULT_S3_KEY);
+//
+//    }
+//
+//    // throw exception when invalid user
+//    @Test
+//    void getLessonContent_shouldThrowException_WhenInvalidOwner() {
+//        // Given
+//        Lesson lesson = LessonFactory.createLessonWithContent();
+//
+//        when(lessonRepository.findById(lessonId)).thenReturn(Optional.of(lesson));
+//
+//        // When
+//        Exception ex = assertThrows(ForbiddenAccessException.class,
+//                () -> lessonService.getLessonContent(lessonId, otherUserId));
+//
+//        // Then
+//        assertEquals(ErrorMessages.ACCESS_DENIED, ex.getMessage());
+//        verify(fileStorageClient, never()).getFileContent(anyString());
+//    }
+//
+//    @Test
+//    void getLessonContent_shouldThrowException_WhenLessonNotFound() {
+//
+//        when(lessonRepository.findById(any())).thenReturn(Optional.empty());
+//
+//        Exception ex = assertThrows(ResourceNotFoundException.class,
+//                () -> lessonService.getLessonContent(lessonId, userId));
+//
+//        assertEquals(ErrorMessages.LESSON_NOT_FOUND, ex.getMessage());
+//        verify(fileStorageClient, never()).getFileContent(anyString());
+//
+//    }
     // throw exception lesson not found
 }

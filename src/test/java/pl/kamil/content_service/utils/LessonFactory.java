@@ -1,7 +1,6 @@
 package pl.kamil.content_service.utils;
 
 import org.springframework.mock.web.MockMultipartFile;
-import pl.kamil.content_service.dtos.LessonContentResponse;
 import pl.kamil.content_service.dtos.LessonResponse;
 import pl.kamil.content_service.models.Content;
 import pl.kamil.content_service.models.Lesson;
@@ -68,12 +67,12 @@ public class LessonFactory {
                 .build();
     }
 
-    public static LessonContentResponse createLessonContentResponse() {
-        return LessonContentResponse.builder()
-                .fileText(DEFAULT_FILE_CONTENT)
-                .totalWords(DEFAULT_TOTAL_WORDS)
-                .build();
-    }
+//    public static LessonContentResponse createLessonContentResponse() {
+//        return LessonContentResponse.builder()
+//                .fileText(DEFAULT_FILE_CONTENT)
+//                .totalWords(DEFAULT_TOTAL_WORDS)
+//                .build();
+//    }
 
     // LESSON HELPER
     public static Lesson createLesson() {

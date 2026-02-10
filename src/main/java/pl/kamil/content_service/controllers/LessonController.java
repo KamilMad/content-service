@@ -74,9 +74,11 @@ public class LessonController {
     @GetMapping("/{id}/content")
     public ResponseEntity<LessonContentResponse> getContent(
             @PathVariable("id")  UUID lessonId,
-            @CurrentUserId UUID userId) {
+            @CurrentUserId UUID userId,
+            @RequestParam(value = "pageNo", defaultValue = "0") int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "30") int pageSize) {
 
-         LessonContentResponse contentResponse = lessonService.getLessonContent(lessonId, userId);
+         LessonContentResponse contentResponse = lessonService.getLessonContent(lessonId, userId, pageNo, pageSize);
         return ResponseEntity.ok().body(contentResponse);
     }
 

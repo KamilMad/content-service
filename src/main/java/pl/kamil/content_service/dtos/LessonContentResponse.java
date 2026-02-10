@@ -4,11 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record LessonContentResponse(
-        String fileText,
+        PagedResponse<String> pagedResponse,
         long totalWords
 ) {
-
-    public static LessonContentResponse from(String fileText, long totalWords) {
-        return new LessonContentResponse(fileText, totalWords);
-    }
 }

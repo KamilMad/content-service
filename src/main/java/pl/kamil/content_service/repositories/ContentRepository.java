@@ -6,4 +6,5 @@ import pl.kamil.content_service.models.Content;
 import java.util.UUID;
 
 public interface ContentRepository extends JpaRepository<Content, UUID> {
+
 }

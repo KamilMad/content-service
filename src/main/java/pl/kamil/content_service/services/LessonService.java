@@ -77,12 +77,13 @@ public class LessonService {
         );
     }
 
-    public LessonContentResponse getLessonContent(UUID lessonId, UUID userId) {
+    public LessonContentResponse getLessonContent(UUID lessonId, UUID userId, int pageNo, int pageSize) {
         Lesson lesson = getLessonOrThrow(lessonId);
         ensureOwnership(lesson, userId);
         Content content = fetchContent(lesson);
         String fileText =  fetchLessonTextFromS3(content);
-        return new LessonContentResponse(fileText, content.getTotalWords());
+        PagedResponse<String> pagedResponse = contentService.createContentPage(fileText, pageNo, pageSize);
+        return new LessonContentResponse(pagedResponse, content.getTotalWords());
     }
 
     private FileUploadResponse uploadFile(MultipartFile file) {
@@ -143,4 +144,5 @@ public class LessonService {
             throw new ForbiddenAccessException(ErrorMessages.ACCESS_DENIED);
         }
     }
+
 }
