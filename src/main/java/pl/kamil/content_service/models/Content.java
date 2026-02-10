@@ -26,7 +26,7 @@ public class Content {
     @CreationTimestamp
     private Instant createdAt;
 
-    @OneToOne
+    @OneToOne(optional = false)
     @JoinColumn(name = "lesson_id")
     private Lesson lesson;
 

@@ -197,8 +197,8 @@ public class LessonServiceTest {
         // Then
         assertNotNull(response);
         assertEquals(3, response.content().size());
-        assertEquals(pageNo, response.page());
-        assertEquals(pageSize, response.size());
+        assertEquals(pageNo, response.pageNo());
+        assertEquals(pageSize, response.pageSize());
         assertEquals(3, response.totalElements());
         assertEquals(1, response.totalPages());
         assertTrue(response.last());
@@ -223,8 +223,8 @@ public class LessonServiceTest {
         // Then
         assertNotNull(response);
         assertTrue(response.content().isEmpty());
-        assertEquals(0, response.page());
-        assertEquals(10, response.size());
+        assertEquals(0, response.pageNo());
+        assertEquals(10, response.pageSize());
         assertEquals(0, response.totalElements());
         assertTrue(response.last());
     }
