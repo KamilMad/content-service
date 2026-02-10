@@ -20,7 +20,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/content")
+@RequestMapping("/lessons")
 @RequiredArgsConstructor
 public class LessonController {
 
