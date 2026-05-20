@@ -1,4 +1,4 @@
-package pl.kamil.content_service.application;
+package pl.kamil.content_service.application.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

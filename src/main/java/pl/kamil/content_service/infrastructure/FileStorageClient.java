@@ -12,10 +12,10 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
-import pl.kamil.content_service.application.FileStorage;
+import pl.kamil.content_service.application.port.out.FileStorage;
 import pl.kamil.content_service.shared.ErrorMessages;
 import pl.kamil.content_service.api.response.FileUploadResponse;
-import pl.kamil.content_service.exceptions.FileStorageException;
+import pl.kamil.content_service.infrastructure.exception.FileStorageException;
 
 import java.io.BufferedReader;
 import java.io.IOException;

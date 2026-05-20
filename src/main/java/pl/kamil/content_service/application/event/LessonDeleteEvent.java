@@ -1,4 +1,4 @@
-package pl.kamil.content_service.application;
+package pl.kamil.content_service.application.event;
 
 import java.util.UUID;
 

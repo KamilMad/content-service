@@ -1,4 +1,4 @@
-package pl.kamil.content_service.application;
+package pl.kamil.content_service.application.port.out;
 
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.api.response.FileUploadResponse;

@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
-import pl.kamil.content_service.application.LessonDeleteEvent;
-import pl.kamil.content_service.exceptions.FileStorageException;
-import pl.kamil.content_service.application.FileStorage;
+import pl.kamil.content_service.application.event.LessonDeleteEvent;
+import pl.kamil.content_service.infrastructure.exception.FileStorageException;
+import pl.kamil.content_service.application.port.out.FileStorage;
 
 @Slf4j
 @Component

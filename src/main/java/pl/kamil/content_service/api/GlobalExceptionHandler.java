@@ -10,7 +10,11 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
-import pl.kamil.content_service.exceptions.*;
+import pl.kamil.content_service.api.response.ApiError;
+import pl.kamil.content_service.application.exception.ForbiddenAccessException;
+import pl.kamil.content_service.application.exception.ResourceNotFoundException;
+import pl.kamil.content_service.application.exception.FileProcessingException;
+import pl.kamil.content_service.infrastructure.exception.FileStorageException;
 
 import java.time.Instant;
 import java.util.HashMap;

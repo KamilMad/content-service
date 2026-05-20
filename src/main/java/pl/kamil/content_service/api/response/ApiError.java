@@ -1,4 +1,4 @@
-package pl.kamil.content_service.exceptions;
+package pl.kamil.content_service.api.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

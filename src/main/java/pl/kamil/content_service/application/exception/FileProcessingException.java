@@ -1,4 +1,4 @@
-package pl.kamil.content_service.infrastructure.excaption;
+package pl.kamil.content_service.application.exception;
 
 public class FileProcessingException extends RuntimeException{
     public FileProcessingException(String message) {
