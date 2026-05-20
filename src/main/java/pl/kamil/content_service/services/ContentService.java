@@ -1,7 +1,7 @@
 package pl.kamil.content_service.services;
 
 import org.springframework.stereotype.Service;
-import pl.kamil.content_service.dtos.PagedResponse;
+import pl.kamil.content_service.api.response.PagedResponse;
 import pl.kamil.content_service.models.Content;
 import pl.kamil.content_service.repositories.ContentRepository;
 

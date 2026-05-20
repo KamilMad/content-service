@@ -1,4 +1,4 @@
-package pl.kamil.content_service.dtos;
+package pl.kamil.content_service.api.request;
 
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.validation.annotations.AllowedContentTypes;

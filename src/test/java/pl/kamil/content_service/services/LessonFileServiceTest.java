@@ -14,7 +14,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.common.ErrorMessages;
-import pl.kamil.content_service.dtos.FileUploadResponse;
+import pl.kamil.content_service.api.response.FileUploadResponse;
 import pl.kamil.content_service.exceptions.ApiError;
 import pl.kamil.content_service.exceptions.FileStorageException;
 

@@ -1,7 +1,7 @@
 package pl.kamil.content_service.utils;
 
 import org.springframework.mock.web.MockMultipartFile;
-import pl.kamil.content_service.dtos.LessonResponse;
+import pl.kamil.content_service.api.response.LessonResponse;
 import pl.kamil.content_service.models.Content;
 import pl.kamil.content_service.models.Lesson;
 

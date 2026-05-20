@@ -1,4 +1,4 @@
-package pl.kamil.content_service.controllers;
+package pl.kamil.content_service.api;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -7,10 +7,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import pl.kamil.content_service.dtos.FileUploadRequest;
-import pl.kamil.content_service.dtos.LessonContentResponse;
-import pl.kamil.content_service.dtos.LessonResponse;
-import pl.kamil.content_service.dtos.PagedResponse;
+import pl.kamil.content_service.api.request.FileUploadRequest;
+import pl.kamil.content_service.api.response.LessonContentResponse;
+import pl.kamil.content_service.api.response.LessonResponse;
+import pl.kamil.content_service.api.response.PagedResponse;
 import pl.kamil.content_service.services.LessonService;
 import pl.kamil.content_service.validation.annotations.CurrentUserId;
 
@@ -29,7 +29,7 @@ public class LessonController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<LessonResponse> createLesson(
             @CurrentUserId UUID userId,
-            @Valid @ModelAttribute  FileUploadRequest request) throws IOException {
+            @Valid @ModelAttribute FileUploadRequest request) throws IOException {
 
         log.info("Controller : User id is {}", userId);
          LessonResponse response =  lessonService.createLesson(request.file(), userId);
