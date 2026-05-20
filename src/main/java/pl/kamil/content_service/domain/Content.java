@@ -1,4 +1,4 @@
-package pl.kamil.content_service.models;
+package pl.kamil.content_service.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

@@ -1,7 +1,7 @@
 package pl.kamil.content_service.api.response;
 
 import lombok.Builder;
-import pl.kamil.content_service.models.Lesson;
+import pl.kamil.content_service.domain.Lesson;
 
 import java.time.Instant;
 import java.util.UUID;

@@ -20,7 +20,7 @@ import pl.kamil.content_service.api.response.PagedResponse;
 import pl.kamil.content_service.exceptions.FileProcessingException;
 import pl.kamil.content_service.exceptions.ForbiddenAccessException;
 import pl.kamil.content_service.exceptions.ResourceNotFoundException;
-import pl.kamil.content_service.models.Lesson;
+import pl.kamil.content_service.domain.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
 import pl.kamil.content_service.utils.LessonFactory;
 

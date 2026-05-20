@@ -1,4 +1,4 @@
-package pl.kamil.content_service.util;
+package pl.kamil.content_service.domain;
 
 import org.springframework.web.multipart.MultipartFile;
 import pl.kamil.content_service.common.ErrorMessages;

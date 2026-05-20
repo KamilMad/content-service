@@ -1,7 +1,7 @@
 package pl.kamil.content_service.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import pl.kamil.content_service.models.Content;
+import pl.kamil.content_service.domain.Content;
 
 import java.util.UUID;
 
