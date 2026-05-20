@@ -7,7 +7,7 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import pl.kamil.content_service.events.LessonDeleteEvent;
 import pl.kamil.content_service.exceptions.FileStorageException;
-import pl.kamil.content_service.services.FileStorage;
+import pl.kamil.content_service.application.FileStorage;
 
 @Slf4j
 @Component
