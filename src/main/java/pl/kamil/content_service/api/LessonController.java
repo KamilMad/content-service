@@ -11,7 +11,7 @@ import pl.kamil.content_service.api.request.FileUploadRequest;
 import pl.kamil.content_service.api.response.LessonContentResponse;
 import pl.kamil.content_service.api.response.LessonResponse;
 import pl.kamil.content_service.api.response.PagedResponse;
-import pl.kamil.content_service.services.LessonService;
+import pl.kamil.content_service.application.LessonService;
 import pl.kamil.content_service.validation.annotations.CurrentUserId;
 
 import java.io.IOException;

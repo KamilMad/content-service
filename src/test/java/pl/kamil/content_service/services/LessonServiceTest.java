@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.multipart.MultipartFile;
+import pl.kamil.content_service.application.LessonService;
 import pl.kamil.content_service.common.ErrorMessages;
 import pl.kamil.content_service.api.response.FileUploadResponse;
 import pl.kamil.content_service.api.response.LessonResponse;

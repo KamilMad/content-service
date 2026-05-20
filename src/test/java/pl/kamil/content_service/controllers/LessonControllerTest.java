@@ -16,7 +16,7 @@ import pl.kamil.content_service.exceptions.ForbiddenAccessException;
 import pl.kamil.content_service.exceptions.ResourceNotFoundException;
 import pl.kamil.content_service.domain.Content;
 import pl.kamil.content_service.domain.Lesson;
-import pl.kamil.content_service.services.LessonService;
+import pl.kamil.content_service.application.LessonService;
 import pl.kamil.content_service.utils.LessonFactory;
 
 import java.time.Instant;

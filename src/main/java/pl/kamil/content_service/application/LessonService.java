@@ -1,4 +1,4 @@
-package pl.kamil.content_service.services;
+package pl.kamil.content_service.application;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +21,8 @@ import pl.kamil.content_service.domain.Content;
 import pl.kamil.content_service.domain.Lesson;
 import pl.kamil.content_service.repositories.LessonRepository;
 import pl.kamil.content_service.domain.TextAnalyzer;
+import pl.kamil.content_service.services.ContentService;
+import pl.kamil.content_service.services.FileStorage;
 
 import java.util.UUID;
 
