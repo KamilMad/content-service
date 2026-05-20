@@ -1,4 +1,4 @@
-package pl.kamil.content_service.repositories;
+package pl.kamil.content_service.infrastructure;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

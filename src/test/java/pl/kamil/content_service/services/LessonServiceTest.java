@@ -22,7 +22,7 @@ import pl.kamil.content_service.exceptions.FileProcessingException;
 import pl.kamil.content_service.exceptions.ForbiddenAccessException;
 import pl.kamil.content_service.exceptions.ResourceNotFoundException;
 import pl.kamil.content_service.domain.Lesson;
-import pl.kamil.content_service.repositories.LessonRepository;
+import pl.kamil.content_service.infrastructure.LessonRepository;
 import pl.kamil.content_service.utils.LessonFactory;
 
 import java.util.List;

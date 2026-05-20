@@ -1,4 +1,4 @@
-package pl.kamil.content_service.repositories;
+package pl.kamil.content_service.infrastructure;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import pl.kamil.content_service.domain.Content;

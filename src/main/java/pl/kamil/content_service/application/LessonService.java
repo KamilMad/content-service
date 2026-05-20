@@ -19,7 +19,7 @@ import pl.kamil.content_service.exceptions.ForbiddenAccessException;
 import pl.kamil.content_service.exceptions.ResourceNotFoundException;
 import pl.kamil.content_service.domain.Content;
 import pl.kamil.content_service.domain.Lesson;
-import pl.kamil.content_service.repositories.LessonRepository;
+import pl.kamil.content_service.infrastructure.LessonRepository;
 import pl.kamil.content_service.domain.TextAnalyzer;
 import pl.kamil.content_service.services.ContentService;
 import pl.kamil.content_service.services.FileStorage;

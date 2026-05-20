@@ -3,7 +3,7 @@ package pl.kamil.content_service.services;
 import org.springframework.stereotype.Service;
 import pl.kamil.content_service.api.response.PagedResponse;
 import pl.kamil.content_service.domain.Content;
-import pl.kamil.content_service.repositories.ContentRepository;
+import pl.kamil.content_service.infrastructure.ContentRepository;
 
 import java.util.List;
 
