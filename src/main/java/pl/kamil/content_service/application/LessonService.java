@@ -14,7 +14,6 @@ import pl.kamil.content_service.api.response.FileUploadResponse;
 import pl.kamil.content_service.api.response.LessonContentResponse;
 import pl.kamil.content_service.api.response.LessonResponse;
 import pl.kamil.content_service.api.response.PagedResponse;
-import pl.kamil.content_service.events.LessonDeleteEvent;
 import pl.kamil.content_service.exceptions.ForbiddenAccessException;
 import pl.kamil.content_service.exceptions.ResourceNotFoundException;
 import pl.kamil.content_service.domain.Content;

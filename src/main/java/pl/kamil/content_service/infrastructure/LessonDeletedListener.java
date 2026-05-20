@@ -1,11 +1,11 @@
-package pl.kamil.content_service.listeners;
+package pl.kamil.content_service.infrastructure;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
-import pl.kamil.content_service.events.LessonDeleteEvent;
+import pl.kamil.content_service.application.LessonDeleteEvent;
 import pl.kamil.content_service.exceptions.FileStorageException;
 import pl.kamil.content_service.application.FileStorage;
 
