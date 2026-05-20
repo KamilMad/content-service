@@ -20,7 +20,6 @@ import pl.kamil.content_service.domain.Content;
 import pl.kamil.content_service.domain.Lesson;
 import pl.kamil.content_service.infrastructure.LessonRepository;
 import pl.kamil.content_service.domain.TextAnalyzer;
-import pl.kamil.content_service.services.ContentService;
 
 import java.util.UUID;
 

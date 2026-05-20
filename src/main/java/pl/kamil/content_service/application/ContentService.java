@@ -1,4 +1,4 @@
-package pl.kamil.content_service.services;
+package pl.kamil.content_service.application;
 
 import org.springframework.stereotype.Service;
 import pl.kamil.content_service.api.response.PagedResponse;
