@@ -3,7 +3,7 @@ package pl.kamil.content_service.config;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import pl.kamil.content_service.validation.validators.CurrentUserIdArgumentResolver;
+import pl.kamil.content_service.shared.validation.validators.CurrentUserIdArgumentResolver;
 
 import java.util.List;
 

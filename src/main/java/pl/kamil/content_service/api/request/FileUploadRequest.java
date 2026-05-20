@@ -1,9 +1,9 @@
 package pl.kamil.content_service.api.request;
 
 import org.springframework.web.multipart.MultipartFile;
-import pl.kamil.content_service.validation.annotations.AllowedContentTypes;
-import pl.kamil.content_service.validation.annotations.MaxFileSize;
-import pl.kamil.content_service.validation.annotations.NotEmptyFile;
+import pl.kamil.content_service.shared.validation.annotations.AllowedContentTypes;
+import pl.kamil.content_service.shared.validation.annotations.MaxFileSize;
+import pl.kamil.content_service.shared.validation.annotations.NotEmptyFile;
 
 public record FileUploadRequest(
         @NotEmptyFile

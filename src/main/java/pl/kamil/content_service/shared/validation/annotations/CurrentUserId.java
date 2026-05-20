@@ -1,4 +1,4 @@
-package pl.kamil.content_service.validation.annotations;
+package pl.kamil.content_service.shared.validation.annotations;
 
 import java.lang.annotation.*;
 

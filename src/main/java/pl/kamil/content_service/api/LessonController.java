@@ -12,7 +12,7 @@ import pl.kamil.content_service.api.response.LessonContentResponse;
 import pl.kamil.content_service.api.response.LessonResponse;
 import pl.kamil.content_service.api.response.PagedResponse;
 import pl.kamil.content_service.application.LessonService;
-import pl.kamil.content_service.validation.annotations.CurrentUserId;
+import pl.kamil.content_service.shared.validation.annotations.CurrentUserId;
 
 import java.io.IOException;
 import java.net.URI;

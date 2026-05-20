@@ -1,9 +1,9 @@
-package pl.kamil.content_service.validation.validators;
+package pl.kamil.content_service.shared.validation.validators;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.web.multipart.MultipartFile;
-import pl.kamil.content_service.validation.annotations.NotEmptyFile;
+import pl.kamil.content_service.shared.validation.annotations.NotEmptyFile;
 
 public class NotEmptyFileValidator implements ConstraintValidator<NotEmptyFile, MultipartFile> {
     @Override

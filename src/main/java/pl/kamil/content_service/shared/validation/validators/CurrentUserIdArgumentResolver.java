@@ -1,4 +1,4 @@
-package pl.kamil.content_service.validation.validators;
+package pl.kamil.content_service.shared.validation.validators;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -7,7 +7,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import pl.kamil.content_service.validation.annotations.CurrentUserId;
+import pl.kamil.content_service.shared.validation.annotations.CurrentUserId;
 
 import java.util.UUID;
 

@@ -1,9 +1,9 @@
-package pl.kamil.content_service.validation.validators;
+package pl.kamil.content_service.shared.validation.validators;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.web.multipart.MultipartFile;
-import pl.kamil.content_service.validation.annotations.AllowedContentTypes;
+import pl.kamil.content_service.shared.validation.annotations.AllowedContentTypes;
 
 import java.util.Set;
 

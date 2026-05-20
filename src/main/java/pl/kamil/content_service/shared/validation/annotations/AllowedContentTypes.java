@@ -1,8 +1,8 @@
-package pl.kamil.content_service.validation.annotations;
+package pl.kamil.content_service.shared.validation.annotations;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-import pl.kamil.content_service.validation.validators.ContentTypeValidator;
+import pl.kamil.content_service.shared.validation.validators.ContentTypeValidator;
 
 import java.lang.annotation.*;
 
