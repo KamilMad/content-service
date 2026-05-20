@@ -17,6 +17,7 @@ import pl.kamil.content_service.common.ErrorMessages;
 import pl.kamil.content_service.api.response.FileUploadResponse;
 import pl.kamil.content_service.exceptions.ApiError;
 import pl.kamil.content_service.exceptions.FileStorageException;
+import pl.kamil.content_service.infrastructure.FileStorageClient;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;

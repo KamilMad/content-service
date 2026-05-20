@@ -1,4 +1,4 @@
-package pl.kamil.content_service.services;
+package pl.kamil.content_service.infrastructure;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
