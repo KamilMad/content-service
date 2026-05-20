@@ -1,4 +1,4 @@
-package pl.kamil.content_service.exceptions;
+package pl.kamil.content_service.api;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataAccessException;
@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import pl.kamil.content_service.exceptions.*;
 
 import java.time.Instant;
 import java.util.HashMap;
