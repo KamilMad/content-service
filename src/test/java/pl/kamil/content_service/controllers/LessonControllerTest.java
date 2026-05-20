@@ -9,7 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import pl.kamil.content_service.common.ErrorMessages;
+import pl.kamil.content_service.shared.ErrorMessages;
 import pl.kamil.content_service.api.response.LessonResponse;
 import pl.kamil.content_service.api.response.PagedResponse;
 import pl.kamil.content_service.exceptions.ForbiddenAccessException;

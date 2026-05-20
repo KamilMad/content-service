@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilderFactory;
 import pl.kamil.content_service.application.FileStorage;
-import pl.kamil.content_service.common.ErrorMessages;
+import pl.kamil.content_service.shared.ErrorMessages;
 import pl.kamil.content_service.api.response.FileUploadResponse;
 import pl.kamil.content_service.exceptions.FileStorageException;
 

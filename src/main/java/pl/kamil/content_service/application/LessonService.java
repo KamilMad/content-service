@@ -9,7 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import pl.kamil.content_service.common.ErrorMessages;
+import pl.kamil.content_service.shared.ErrorMessages;
 import pl.kamil.content_service.api.response.FileUploadResponse;
 import pl.kamil.content_service.api.response.LessonContentResponse;
 import pl.kamil.content_service.api.response.LessonResponse;

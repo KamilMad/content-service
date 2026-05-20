@@ -1,4 +1,4 @@
-package pl.kamil.content_service.common;
+package pl.kamil.content_service.shared;
 
 public class ErrorMessages {
     // Lesson Errors

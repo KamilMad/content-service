@@ -3,7 +3,7 @@ package pl.kamil.content_service.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
-import pl.kamil.content_service.util.TokenRelayInterceptor;
+import pl.kamil.content_service.infrastructure.TokenRelayInterceptor;
 
 @Configuration
 public class RestClientConfig {

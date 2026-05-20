@@ -1,4 +1,4 @@
-package pl.kamil.content_service.util;
+package pl.kamil.content_service.infrastructure;
 
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
