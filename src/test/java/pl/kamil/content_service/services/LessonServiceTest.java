@@ -13,7 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.multipart.MultipartFile;
-import pl.kamil.content_service.application.ContentService;
 import pl.kamil.content_service.application.LessonService;
 import pl.kamil.content_service.shared.ErrorMessages;
 import pl.kamil.content_service.api.response.FileUploadResponse;
@@ -45,9 +44,6 @@ public class LessonServiceTest {
     private FileStorageClient fileStorageClient;
 
     @Mock
-    private ContentService contentService;
-
-    @Mock
     private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
@@ -69,8 +65,7 @@ public class LessonServiceTest {
         // When
         when(fileStorageClient.storeFile(mockFile)).thenReturn(response);
         when(lessonRepository.save(any(Lesson.class))).thenReturn(lesson);
-        when(contentService.createContent(anyString(), anyLong()))
-                .thenReturn(LessonFactory.createContent());
+
         // Then
         LessonResponse lessonResponse= lessonService.createLesson(mockFile, userId);
 
@@ -137,8 +132,6 @@ public class LessonServiceTest {
         when(lessonRepository.save(any(Lesson.class)))
                 .thenAnswer(invocation -> mockSavedLesson);
 
-        when(contentService.createContent(anyString(), anyLong()))
-                .thenReturn(LessonFactory.createContent());
         // When
         lessonService.createLesson(mockFile, userId);
 

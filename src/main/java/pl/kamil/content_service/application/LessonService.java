@@ -33,7 +33,6 @@ public class LessonService {
 
     private final LessonRepository lessonRepository;
     private final FileStorage fileStorageClient;
-    private final ContentService contentService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
@@ -83,7 +82,7 @@ public class LessonService {
         ensureOwnership(lesson, userId);
         Content content = fetchContent(lesson);
         String fileText =  fetchLessonTextFromS3(content);
-        PagedResponse<String> pagedResponse = contentService.createContentPage(fileText, pageNo, pageSize);
+        PagedResponse<String> pagedResponse = TextPaginator.paginate(fileText, pageNo, pageSize);
         return new LessonContentResponse(pagedResponse, content.getTotalWords());
     }
 
@@ -103,7 +102,7 @@ public class LessonService {
 
     private Content createContentEntity(MultipartFile file, FileUploadResponse uploadResponse) {
         long totalWords = TextAnalyzer.countWordsInFile(file);
-        return contentService.createContent(uploadResponse.s3Key(), totalWords);
+        return Content.create(uploadResponse.s3Key(), totalWords);
     }
 
     private LessonResponse saveLesson(Lesson lesson) {

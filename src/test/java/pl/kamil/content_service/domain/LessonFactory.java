@@ -58,7 +58,6 @@ public class LessonFactory {
     // CONTENT HELPER
     public static Content createContent() {
         Content content =  Content.create(DEFAULT_S3_KEY, DEFAULT_TOTAL_WORDS);
-        System.out.println("Is content null? " + (content == null));
         return content;
     }
 
@@ -81,9 +80,7 @@ public class LessonFactory {
     public static Lesson createLessonWithContent() {
         Lesson lesson = createLesson();
         Content content = createContent();
-        System.out.println("IS CONTENT NULL? " + (content == null));
         lesson.attacheContent(content);
-        System.out.println(lesson.getContent() == null ? "Content is null" : "Content is not null");
         return lesson;
     }
 

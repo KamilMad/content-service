@@ -1,26 +1,11 @@
 package pl.kamil.content_service.application;
 
-import org.springframework.stereotype.Service;
 import pl.kamil.content_service.api.response.PagedResponse;
-import pl.kamil.content_service.domain.Content;
-import pl.kamil.content_service.infrastructure.ContentRepository;
 
 import java.util.List;
 
-@Service
-public class ContentService {
-
-    private final ContentRepository contentRepository;
-
-    public ContentService(ContentRepository contentRepository) {
-        this.contentRepository = contentRepository;
-    }
-
-    public Content createContent(String s3key, long totalWords) {
-        return Content.create(s3key, totalWords);
-    }
-
-    public PagedResponse<String> createContentPage(String fileText, int pageNo, int pageSize) {
+public class TextPaginator {
+    public static PagedResponse<String> paginate(String fileText, int pageNo, int pageSize) {
 
         int totalLength = fileText.length();
         int totalPages = (int) Math.ceil((double) totalLength / pageSize);
