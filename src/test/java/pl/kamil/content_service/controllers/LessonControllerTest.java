@@ -9,15 +9,14 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import pl.kamil.content_service.shared.ErrorMessages;
 import pl.kamil.content_service.api.response.LessonResponse;
 import pl.kamil.content_service.api.response.PagedResponse;
+import pl.kamil.content_service.application.LessonService;
 import pl.kamil.content_service.application.exception.ForbiddenAccessException;
 import pl.kamil.content_service.application.exception.ResourceNotFoundException;
-import pl.kamil.content_service.domain.Content;
 import pl.kamil.content_service.domain.Lesson;
-import pl.kamil.content_service.application.LessonService;
-import pl.kamil.content_service.utils.LessonFactory;
+import pl.kamil.content_service.domain.LessonFactory;
+import pl.kamil.content_service.shared.ErrorMessages;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -179,8 +178,9 @@ public class LessonControllerTest {
 
     @Test
     void getLessonById_shouldReturnLessonResponse_whenLessonExistsAndUserIsOwner() throws Exception {
-        Content content = new Content();
-        Lesson lesson = new Lesson(lessonId, userId, "title", content, Instant.now(), Instant.now());
+        //Content content =
+        //Lesson lesson = new Lesson(lessonId, userId, "title", content, Instant.now(), Instant.now());
+        Lesson lesson = LessonFactory.createLessonWithContent();
         LessonResponse lessonResponse = LessonResponse.from(lesson);
 
         when(lessonService.getLesson(lessonId, userId)).thenReturn(lessonResponse);

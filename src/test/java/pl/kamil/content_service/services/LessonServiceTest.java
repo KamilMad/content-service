@@ -25,7 +25,7 @@ import pl.kamil.content_service.application.exception.ResourceNotFoundException;
 import pl.kamil.content_service.domain.Lesson;
 import pl.kamil.content_service.infrastructure.FileStorageClient;
 import pl.kamil.content_service.infrastructure.LessonRepository;
-import pl.kamil.content_service.utils.LessonFactory;
+import pl.kamil.content_service.domain.LessonFactory;
 
 import java.util.List;
 import java.util.Optional;
@@ -69,7 +69,8 @@ public class LessonServiceTest {
         // When
         when(fileStorageClient.storeFile(mockFile)).thenReturn(response);
         when(lessonRepository.save(any(Lesson.class))).thenReturn(lesson);
-
+        when(contentService.createContent(anyString(), anyLong()))
+                .thenReturn(LessonFactory.createContent());
         // Then
         LessonResponse lessonResponse= lessonService.createLesson(mockFile, userId);
 
@@ -130,9 +131,14 @@ public class LessonServiceTest {
 
         Lesson mockSavedLesson = LessonFactory.createLessonWithContent();
 
-        when(fileStorageClient.storeFile(mockFile)).thenReturn(new FileUploadResponse(LessonFactory.DEFAULT_S3_KEY));
-        when(lessonRepository.save(any(Lesson.class))).thenReturn(mockSavedLesson);
+        when(fileStorageClient.storeFile(mockFile)).
+                thenReturn(new FileUploadResponse(LessonFactory.DEFAULT_S3_KEY));
 
+        when(lessonRepository.save(any(Lesson.class)))
+                .thenAnswer(invocation -> mockSavedLesson);
+
+        when(contentService.createContent(anyString(), anyLong()))
+                .thenReturn(LessonFactory.createContent());
         // When
         lessonService.createLesson(mockFile, userId);
 

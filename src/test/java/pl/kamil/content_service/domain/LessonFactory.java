@@ -1,9 +1,7 @@
-package pl.kamil.content_service.utils;
+package pl.kamil.content_service.domain;
 
 import org.springframework.mock.web.MockMultipartFile;
 import pl.kamil.content_service.api.response.LessonResponse;
-import pl.kamil.content_service.domain.Content;
-import pl.kamil.content_service.domain.Lesson;
 
 import java.time.Instant;
 import java.util.List;
@@ -59,46 +57,34 @@ public class LessonFactory {
 
     // CONTENT HELPER
     public static Content createContent() {
-        return Content.builder()
-                .id(TEST_CONTENT_ID)
-                .s3Key(DEFAULT_S3_KEY)
-                .totalWords(DEFAULT_TOTAL_WORDS)
-                .createdAt(Instant.now())
-                .build();
+        Content content =  Content.create(DEFAULT_S3_KEY, DEFAULT_TOTAL_WORDS);
+        System.out.println("Is content null? " + (content == null));
+        return content;
     }
-
-//    public static LessonContentResponse createLessonContentResponse() {
-//        return LessonContentResponse.builder()
-//                .fileText(DEFAULT_FILE_CONTENT)
-//                .totalWords(DEFAULT_TOTAL_WORDS)
-//                .build();
-//    }
 
     // LESSON HELPER
     public static Lesson createLesson() {
-        return Lesson.builder()
-                .id(TEST_LESSON_ID)
-                .createdBy(TEST_USER_ID)
-                .title(DEFAULT_ORIGINAL_FILENAME)
-                .content(null)
-                .createdAt(Instant.now())
-                .updatedAt(Instant.now())
-                .build();
+        return new Lesson(TEST_LESSON_ID, DEFAULT_ORIGINAL_FILENAME, TEST_USER_ID);
+
+    }
+
+    public static Lesson createLesson(UUID id, String title, UUID createdBy) {
+        return new Lesson(id, title, createdBy);
     }
 
     public static List<Lesson> createLessonList(int count) {
         return IntStream.range(0, count)
-                .mapToObj(i -> createLesson().toBuilder()
-                        .id(UUID.randomUUID())
-                        .title(DEFAULT_ORIGINAL_FILENAME + " " + i)
-                                .build()
+                .mapToObj(i -> createLesson(UUID.randomUUID(), DEFAULT_ORIGINAL_FILENAME, UUID.randomUUID())
                         ).toList();
     }
 
     public static Lesson createLessonWithContent() {
-        return createLesson().toBuilder()
-                .content(createContent())
-                .build();
+        Lesson lesson = createLesson();
+        Content content = createContent();
+        System.out.println("IS CONTENT NULL? " + (content == null));
+        lesson.attacheContent(content);
+        System.out.println(lesson.getContent() == null ? "Content is null" : "Content is not null");
+        return lesson;
     }
 
 }

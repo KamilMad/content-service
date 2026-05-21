@@ -93,15 +93,12 @@ public class LessonService {
 
     private Lesson createLessonEntity(MultipartFile file, Content content, UUID userId) {
         Lesson lesson = buildLessonEntity(file.getOriginalFilename(), userId);
-        lesson.setContent(content);
+        lesson.attacheContent(content);
         return lesson;
     }
 
     private Lesson buildLessonEntity(String filename, UUID userId) {
-        return Lesson.builder()
-                .title(filename)
-                .createdBy(userId)
-                .build();
+        return Lesson.create(filename, userId);
     }
 
     private Content createContentEntity(MultipartFile file, FileUploadResponse uploadResponse) {

@@ -17,10 +17,7 @@ public class ContentService {
     }
 
     public Content createContent(String s3key, long totalWords) {
-        return Content.builder()
-                .s3Key(s3key)
-                .totalWords(totalWords)
-                .build();
+        return Content.create(s3key, totalWords);
     }
 
     public PagedResponse<String> createContentPage(String fileText, int pageNo, int pageSize) {
