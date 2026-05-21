@@ -39,4 +39,10 @@ public class Content {
     @CreationTimestamp
     private Instant createdAt;
 
+    @OneToOne(
+            fetch = FetchType.LAZY,
+            optional = false)
+    @JoinColumn(name = "lesson_id")
+    private Lesson lesson;
+
 }

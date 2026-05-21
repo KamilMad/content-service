@@ -22,7 +22,11 @@ public class Lesson {
 
     private String title;
 
-    @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(
+            mappedBy = "lesson",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY)
     private Content content;
 
     @CreatedDate
